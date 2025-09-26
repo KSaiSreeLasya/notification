@@ -142,6 +142,14 @@ export default function Index() {
             )}
 
             <TabsContent value="admin" className="mt-6">
+              {!sessionUserId && (
+                <Card className="mb-4 p-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-muted-foreground">Sign in to manage alerts.</div>
+                    <EmailSignin />
+                  </div>
+                </Card>
+              )}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Label className="text-sm">Severity</Label>
@@ -159,7 +167,7 @@ export default function Index() {
                 </div>
                 <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
                   <DialogTrigger asChild>
-                    <Button disabled={!supabaseReady}>Create Alert</Button>
+                    <Button disabled={!supabaseReady || !sessionUserId}>Create Alert</Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-xl">
                     <DialogHeader>
