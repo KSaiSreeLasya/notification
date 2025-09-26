@@ -287,25 +287,51 @@ export default function Index() {
   );
 }
 
-function EmailSignin() {
+function PasswordAuth({ compact }: { compact?: boolean }) {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
-  const [sending, setSending] = useState(false);
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
+  const width = compact ? "w-44" : "w-56";
+
+  const afterAuth = async () => {
+    const s = await getCurrentSession();
+    const uid = s?.user.id;
+    if (uid && username) {
+      try { await upsertProfile(uid, username); } catch {}
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
-      <Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-56" />
-      <Button size="sm" disabled={!email || sending} onClick={async () => {
+      {!compact && (
+        <Input type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} className={width} />
+      )}
+      <Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} className={width} />
+      <Input type="password" placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} className={width} />
+      <Button size="sm" disabled={!email || !password || loading} onClick={async () => {
         try {
-          setSending(true);
-          const origin = window.location.origin;
-          await signInWithEmail(email, origin);
-          toast({ title: "Check your email", description: "Magic link sent." });
+          setLoading(true);
+          await signInWithPassword(email, password);
+          toast({ title: "Signed in" });
+          await afterAuth();
         } catch (e: any) {
           toast({ title: "Sign-in failed", description: e.message, variant: "destructive" });
-        } finally {
-          setSending(false);
-        }
+        } finally { setLoading(false); }
       }}>Sign in</Button>
+      {!compact && (
+        <Button size="sm" variant="outline" disabled={!email || !password || loading} onClick={async () => {
+          try {
+            setLoading(true);
+            await signUpWithPassword(email, password);
+            toast({ title: "Account created" });
+            await afterAuth();
+          } catch (e: any) {
+            toast({ title: "Sign-up failed", description: e.message, variant: "destructive" });
+          } finally { setLoading(false); }
+        }}>Sign up</Button>
+      )}
       <Button size="sm" variant="ghost" onClick={() => signOut()}>Sign out</Button>
     </div>
   );
