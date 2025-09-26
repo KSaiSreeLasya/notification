@@ -286,33 +286,63 @@ export default function Index() {
                     </DialogHeader>
                     <div className="space-y-3">
                       <div className="space-y-2">
-                        <Label htmlFor="admin-username">Username (optional)</Label>
-                        <Input id="admin-username" value={adminUsername} onChange={(e) => setAdminUsername(e.target.value)} />
+                        <Label htmlFor="admin-username">
+                          Username (optional)
+                        </Label>
+                        <Input
+                          id="admin-username"
+                          value={adminUsername}
+                          onChange={(e) => setAdminUsername(e.target.value)}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="admin-email">Email</Label>
-                        <Input id="admin-email" type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+                        <Input
+                          id="admin-email"
+                          type="email"
+                          value={adminEmail}
+                          onChange={(e) => setAdminEmail(e.target.value)}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="admin-password">Password</Label>
-                        <Input id="admin-password" type="password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} />
+                        <Input
+                          id="admin-password"
+                          type="password"
+                          value={adminPassword}
+                          onChange={(e) => setAdminPassword(e.target.value)}
+                        />
                       </div>
                       <div className="flex justify-end">
                         <Button
-                          disabled={!adminEmail || !adminPassword || adminLoading}
+                          disabled={
+                            !adminEmail || !adminPassword || adminLoading
+                          }
                           onClick={async () => {
                             try {
                               setAdminLoading(true);
-                              await adminCreateUser({ email: adminEmail, password: adminPassword, username: adminUsername || undefined });
+                              await adminCreateUser({
+                                email: adminEmail,
+                                password: adminPassword,
+                                username: adminUsername || undefined,
+                              });
                               toast({ title: "User created" });
-                              sonnerToast.success(`User created: ${adminEmail}`);
+                              sonnerToast.success(
+                                `User created: ${adminEmail}`,
+                              );
                               setAddUserOpen(false);
                               setAdminEmail("");
                               setAdminPassword("");
                               setAdminUsername("");
                             } catch (e: any) {
-                              toast({ title: "Create user failed", description: e.message, variant: "destructive" });
-                              sonnerToast.error(`Create user failed: ${e.message}`);
+                              toast({
+                                title: "Create user failed",
+                                description: e.message,
+                                variant: "destructive",
+                              });
+                              sonnerToast.error(
+                                `Create user failed: ${e.message}`,
+                              );
                             } finally {
                               setAdminLoading(false);
                             }
@@ -435,7 +465,9 @@ export default function Index() {
                     ) : (
                       <div className="flex items-center gap-2">
                         <SignInDialog />
-                        <span className="hidden sm:inline">Sign in with credentials provided by admin</span>
+                        <span className="hidden sm:inline">
+                          Sign in with credentials provided by admin
+                        </span>
                       </div>
                     )}
                   </div>

@@ -10,7 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { signUpWithPassword, getCurrentSession, signInWithPassword } from "@/lib/supabase";
+import {
+  signUpWithPassword,
+  getCurrentSession,
+  signInWithPassword,
+} from "@/lib/supabase";
 import { upsertProfile } from "@/services/profiles";
 import { toast as sonnerToast } from "sonner";
 
