@@ -792,26 +792,10 @@ function AlertForm({
             </SelectContent>
           </Select>
         </div>
-        {visibility === "teams" && (
-          <div className="space-y-2">
-            <Label htmlFor="teams">Team IDs (comma-separated)</Label>
-            <Input
-              id="teams"
-              placeholder="engineering, marketing"
-              value={teams}
-              onChange={(e) => setTeams(e.target.value)}
-            />
-          </div>
-        )}
         {visibility === "users" && (
           <div className="space-y-2">
-            <Label htmlFor="emails">User Emails (comma-separated)</Label>
-            <Input
-              id="emails"
-              placeholder="a@company.com, b@company.com"
-              value={emails}
-              onChange={(e) => setEmails(e.target.value)}
-            />
+            <Label htmlFor="emails">Users</Label>
+            <UserMultiSelect value={emails} onChange={setEmails} />
           </div>
         )}
         <div className="space-y-2">
