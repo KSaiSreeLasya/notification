@@ -14,3 +14,14 @@ export async function adminCreateUser(payload: {
   }
   return res.json();
 }
+
+export async function adminListUsers(): Promise<
+  { id: string; email: string | null }[]
+> {
+  const res = await fetch("/api/admin/users-list");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Request failed (${res.status})`);
+  }
+  return res.json();
+}

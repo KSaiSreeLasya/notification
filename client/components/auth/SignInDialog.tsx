@@ -9,13 +9,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { signInWithPassword, getCurrentSession } from "@/lib/supabase";
 import { upsertProfile } from "@/services/profiles";
 import { toast as sonnerToast } from "sonner";
 
 export default function SignInDialog() {
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -56,8 +54,7 @@ export default function SignInDialog() {
                 try {
                   setLoading(true);
                   await signInWithPassword(email, password);
-                  toast({ title: "Signed in" });
-                  sonnerToast.success(`Welcome ${email}`);
+                  sonnerToast.success(`Signed in as ${email}`);
                   const s = await getCurrentSession();
                   const uid = s?.user.id;
                   const pendingKey = `pending_profile_${email.toLowerCase()}`;
@@ -70,11 +67,6 @@ export default function SignInDialog() {
                   }
                   setOpen(false);
                 } catch (e: any) {
-                  toast({
-                    title: "Sign-in failed",
-                    description: e.message,
-                    variant: "destructive",
-                  });
                   sonnerToast.error(`Sign-in failed: ${e.message}`);
                 } finally {
                   setLoading(false);

@@ -23,6 +23,19 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -32,7 +45,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import SignInDialog from "@/components/auth/SignInDialog";
 import { toast as sonnerToast } from "sonner";
-import { adminCreateUser } from "@/services/admin";
+import { adminCreateUser, adminListUsers } from "@/services/admin";
 import {
   getSupabase,
   isSupabaseConfigured,
@@ -152,9 +165,14 @@ export default function Index() {
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
 
   const visibleAlertsQuery = useQuery({
-    queryKey: ["visible-alerts", sessionEmail, team],
-    queryFn: () => getVisibleAlertsForUser(sessionEmail ?? null, team || null),
-    enabled: supabaseReady,
+    queryKey: ["visible-alerts", sessionEmail, sessionUserId, team],
+    queryFn: () =>
+      getVisibleAlertsForUser(
+        sessionEmail ?? null,
+        team || null,
+        sessionUserId,
+      ),
+    enabled: true,
   });
 
   const snoozeToday = (alertId: string) => {
@@ -195,7 +213,7 @@ export default function Index() {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl">
             <Badge className="mb-3">PRD</Badge>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 pb-4">
               Alerting & Notification Platform
             </h1>
             <p className="mt-4 text-muted-foreground text-lg">
@@ -326,7 +344,6 @@ export default function Index() {
                                 password: adminPassword,
                                 username: adminUsername || undefined,
                               });
-                              toast({ title: "User created" });
                               sonnerToast.success(
                                 `User created: ${adminEmail}`,
                               );
@@ -335,11 +352,6 @@ export default function Index() {
                               setAdminPassword("");
                               setAdminUsername("");
                             } catch (e: any) {
-                              toast({
-                                title: "Create user failed",
-                                description: e.message,
-                                variant: "destructive",
-                              });
                               sonnerToast.error(
                                 `Create user failed: ${e.message}`,
                               );
@@ -694,6 +706,72 @@ function renderReminderInfo(
   return parts.join(" · ");
 }
 
+function UserMultiSelect({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const { data } = useQuery({
+    queryKey: ["admin-users-list"],
+    queryFn: adminListUsers,
+    staleTime: 60_000,
+  });
+  const users = (data ?? []).filter((u) => !!u.email) as {
+    id: string;
+    email: string;
+  }[];
+  const selected = new Set(value);
+  const toggle = (email: string) => {
+    const next = new Set(selected);
+    if (next.has(email)) next.delete(email);
+    else next.add(email);
+    onChange(Array.from(next));
+  };
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="w-full justify-between">
+          {value.length > 0 ? `${value.length} selected` : "Select users"}
+          <span className="text-xs text-muted-foreground">
+            {value.length > 0 ? value.slice(0, 3).join(", ") : ""}
+          </span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0">
+        <Command>
+          <CommandInput placeholder="Search users..." />
+          <CommandList>
+            <CommandEmpty>No users found.</CommandEmpty>
+            <CommandGroup>
+              {users.map((u) => {
+                const email = u.email;
+                const checked = selected.has(email);
+                return (
+                  <CommandItem
+                    key={u.id}
+                    value={email}
+                    onSelect={() => toggle(email)}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={checked}
+                      readOnly
+                    />
+                    <span>{email}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function AlertForm({
   initial,
   onSubmit,
@@ -709,11 +787,8 @@ function AlertForm({
   const [visibility, setVisibility] = useState<AlertInput["visibilityScope"]>(
     initial?.visibilityScope ?? "org",
   );
-  const [teams, setTeams] = useState<string>(
-    (initial?.teamIds ?? [])?.join(", ") ?? "",
-  );
-  const [emails, setEmails] = useState<string>(
-    (initial?.userEmails ?? [])?.join(", ") ?? "",
+  const [emails, setEmails] = useState<string[]>(
+    (initial?.userEmails ?? []) as string[],
   );
   const [freq, setFreq] = useState<number>(
     initial?.reminderFrequencyHours ?? 2,
@@ -728,8 +803,7 @@ function AlertForm({
     setMessage(initial?.message ?? "");
     setSeverity(initial?.severity ?? "info");
     setVisibility(initial?.visibilityScope ?? "org");
-    setTeams(((initial?.teamIds ?? []) as string[]).join(", "));
-    setEmails(((initial?.userEmails ?? []) as string[]).join(", "));
+    setEmails((initial?.userEmails ?? []) as string[]);
     setFreq(initial?.reminderFrequencyHours ?? 2);
     setExpires(initial?.expiresAt ? initial.expiresAt.slice(0, 16) : "");
     setActive(initial?.active ?? true);
@@ -745,20 +819,8 @@ function AlertForm({
           message,
           severity,
           visibilityScope: visibility,
-          teamIds:
-            visibility === "teams"
-              ? teams
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : null,
-          userEmails:
-            visibility === "users"
-              ? emails
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : null,
+          teamIds: null,
+          userEmails: visibility === "users" ? emails : null,
           reminderFrequencyHours: Number(freq) || 2,
           expiresAt: expires ? new Date(expires).toISOString() : null,
           active,
@@ -813,31 +875,14 @@ function AlertForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="org">Entire Organization</SelectItem>
-              <SelectItem value="teams">Specific Teams</SelectItem>
               <SelectItem value="users">Specific Users</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        {visibility === "teams" && (
-          <div className="space-y-2">
-            <Label htmlFor="teams">Team IDs (comma-separated)</Label>
-            <Input
-              id="teams"
-              placeholder="engineering, marketing"
-              value={teams}
-              onChange={(e) => setTeams(e.target.value)}
-            />
-          </div>
-        )}
         {visibility === "users" && (
           <div className="space-y-2">
-            <Label htmlFor="emails">User Emails (comma-separated)</Label>
-            <Input
-              id="emails"
-              placeholder="a@company.com, b@company.com"
-              value={emails}
-              onChange={(e) => setEmails(e.target.value)}
-            />
+            <Label htmlFor="emails">Users</Label>
+            <UserMultiSelect value={emails} onChange={setEmails} />
           </div>
         )}
         <div className="space-y-2">

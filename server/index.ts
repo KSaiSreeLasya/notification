@@ -3,6 +3,9 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { adminCreateUser } from "./routes/admin-create-user";
+import { getVisibleAlerts } from "./routes/visible-alerts";
+import { seedTestOrgAlert } from "./routes/seed-test";
+import { adminListUsers } from "./routes/admin-list-users";
 
 export function createServer() {
   const app = express();
@@ -20,7 +23,14 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Public visible alerts (org or user/team filters)
+  app.get("/api/visible-alerts", getVisibleAlerts);
+
+  // Debug/seed: create a test org alert
+  app.get("/api/seed-test-alert", seedTestOrgAlert);
+
   // Admin routes
+  app.get("/api/admin/users-list", adminListUsers);
   app.post("/api/admin/users", adminCreateUser);
 
   return app;
