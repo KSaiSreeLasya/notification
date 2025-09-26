@@ -81,9 +81,9 @@ export default function Index() {
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
 
   const visibleAlertsQuery = useQuery({
-    queryKey: ["visible-alerts", userId, team],
-    queryFn: () => getVisibleAlertsForUser(userId, team || null),
-    enabled: supabaseReady,
+    queryKey: ["visible-alerts", sessionUserId, team],
+    queryFn: () => getVisibleAlertsForUser(sessionUserId!, team || null),
+    enabled: supabaseReady && !!sessionUserId,
   });
 
   const snoozeToday = (alertId: string) => {
