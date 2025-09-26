@@ -31,7 +31,10 @@ export const adminListUsers: RequestHandler = async (_req, res) => {
         perPage,
       });
       if (error) return res.status(400).json({ error: error.message });
-      const users = (data?.users ?? []).map((u) => ({ id: u.id, email: u.email }));
+      const users = (data?.users ?? []).map((u) => ({
+        id: u.id,
+        email: u.email,
+      }));
       all.push(...users);
       if ((data?.users?.length ?? 0) < perPage) break;
       page += 1;

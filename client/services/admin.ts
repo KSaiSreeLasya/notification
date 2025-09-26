@@ -15,7 +15,9 @@ export async function adminCreateUser(payload: {
   return res.json();
 }
 
-export async function adminListUsers(): Promise<{ id: string; email: string | null }[]> {
+export async function adminListUsers(): Promise<
+  { id: string; email: string | null }[]
+> {
   const res = await fetch("/api/admin/users-list");
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

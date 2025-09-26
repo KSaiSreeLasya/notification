@@ -17,11 +17,14 @@ export const getVisibleAlerts: RequestHandler = async (req, res) => {
       });
     }
 
-    const email = (req.query.email as string | undefined)?.toLowerCase() || null;
+    const email =
+      (req.query.email as string | undefined)?.toLowerCase() || null;
     const team = (req.query.team as string | undefined) || null;
     const uid = (req.query.uid as string | undefined) || null;
 
-    const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+    const admin = createClient(url, serviceKey, {
+      auth: { persistSession: false },
+    });
 
     const nowIso = new Date().toISOString();
     const { data, error } = await admin

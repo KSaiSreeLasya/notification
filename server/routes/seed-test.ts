@@ -17,7 +17,9 @@ export const seedTestOrgAlert: RequestHandler = async (_req, res) => {
       });
     }
 
-    const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
+    const admin = createClient(url, serviceKey, {
+      auth: { persistSession: false },
+    });
 
     const title = "Test Org Alert";
     const payload = {

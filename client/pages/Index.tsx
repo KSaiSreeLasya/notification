@@ -22,8 +22,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -156,7 +167,11 @@ export default function Index() {
   const visibleAlertsQuery = useQuery({
     queryKey: ["visible-alerts", sessionEmail, sessionUserId, team],
     queryFn: () =>
-      getVisibleAlertsForUser(sessionEmail ?? null, team || null, sessionUserId),
+      getVisibleAlertsForUser(
+        sessionEmail ?? null,
+        team || null,
+        sessionUserId,
+      ),
     enabled: true,
   });
 
@@ -329,13 +344,17 @@ export default function Index() {
                                 password: adminPassword,
                                 username: adminUsername || undefined,
                               });
-                              sonnerToast.success(`User created: ${adminEmail}`);
+                              sonnerToast.success(
+                                `User created: ${adminEmail}`,
+                              );
                               setAddUserOpen(false);
                               setAdminEmail("");
                               setAdminPassword("");
                               setAdminUsername("");
                             } catch (e: any) {
-                              sonnerToast.error(`Create user failed: ${e.message}`);
+                              sonnerToast.error(
+                                `Create user failed: ${e.message}`,
+                              );
                             } finally {
                               setAdminLoading(false);
                             }
@@ -699,7 +718,10 @@ function UserMultiSelect({
     queryFn: adminListUsers,
     staleTime: 60_000,
   });
-  const users = (data ?? []).filter((u) => !!u.email) as { id: string; email: string }[];
+  const users = (data ?? []).filter((u) => !!u.email) as {
+    id: string;
+    email: string;
+  }[];
   const selected = new Set(value);
   const toggle = (email: string) => {
     const next = new Set(selected);
@@ -727,8 +749,17 @@ function UserMultiSelect({
                 const email = u.email;
                 const checked = selected.has(email);
                 return (
-                  <CommandItem key={u.id} value={email} onSelect={() => toggle(email)}>
-                    <input type="checkbox" className="mr-2" checked={checked} readOnly />
+                  <CommandItem
+                    key={u.id}
+                    value={email}
+                    onSelect={() => toggle(email)}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={checked}
+                      readOnly
+                    />
                     <span>{email}</span>
                   </CommandItem>
                 );
@@ -757,7 +788,7 @@ function AlertForm({
     initial?.visibilityScope ?? "org",
   );
   const [emails, setEmails] = useState<string[]>(
-    (initial?.userEmails ?? []) as string[]
+    (initial?.userEmails ?? []) as string[],
   );
   const [freq, setFreq] = useState<number>(
     initial?.reminderFrequencyHours ?? 2,
@@ -772,7 +803,7 @@ function AlertForm({
     setMessage(initial?.message ?? "");
     setSeverity(initial?.severity ?? "info");
     setVisibility(initial?.visibilityScope ?? "org");
-    setEmails(((initial?.userEmails ?? []) as string[]));
+    setEmails((initial?.userEmails ?? []) as string[]);
     setFreq(initial?.reminderFrequencyHours ?? 2);
     setExpires(initial?.expiresAt ? initial.expiresAt.slice(0, 16) : "");
     setActive(initial?.active ?? true);
