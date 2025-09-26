@@ -152,8 +152,9 @@ export default function Index() {
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
 
   const visibleAlertsQuery = useQuery({
-    queryKey: ["visible-alerts", sessionEmail, team],
-    queryFn: () => getVisibleAlertsForUser(sessionEmail ?? null, team || null),
+    queryKey: ["visible-alerts", sessionEmail, sessionUserId, team],
+    queryFn: () =>
+      getVisibleAlertsForUser(sessionEmail ?? null, team || null, sessionUserId),
     enabled: supabaseReady,
   });
 
