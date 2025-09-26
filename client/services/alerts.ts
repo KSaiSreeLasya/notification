@@ -115,7 +115,9 @@ export async function getVisibleAlertsForUser(
     if (a.visibilityScope === "teams")
       return (a.teamIds ?? []).includes(teamId ?? "");
     if (a.visibilityScope === "users")
-      return userEmail ? (a.userEmails ?? []).includes(userEmail) : false;
+      return userEmail
+        ? (a.userEmails ?? []).some((e) => (e || "").toLowerCase() === userEmail.toLowerCase())
+        : false;
     return false;
   });
 }
