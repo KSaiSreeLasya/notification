@@ -9,13 +9,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
 import { signInWithPassword, getCurrentSession } from "@/lib/supabase";
 import { upsertProfile } from "@/services/profiles";
 import { toast as sonnerToast } from "sonner";
 
 export default function SignInDialog() {
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
