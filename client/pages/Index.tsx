@@ -700,11 +700,8 @@ function AlertForm({
   const [visibility, setVisibility] = useState<AlertInput["visibilityScope"]>(
     initial?.visibilityScope ?? "org",
   );
-  const [teams, setTeams] = useState<string>(
-    (initial?.teamIds ?? [])?.join(", ") ?? "",
-  );
-  const [emails, setEmails] = useState<string>(
-    (initial?.userEmails ?? [])?.join(", ") ?? "",
+  const [emails, setEmails] = useState<string[]>(
+    (initial?.userEmails ?? []) as string[]
   );
   const [freq, setFreq] = useState<number>(
     initial?.reminderFrequencyHours ?? 2,
