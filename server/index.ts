@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { adminCreateUser } from "./routes/admin-create-user";
+import { getVisibleAlerts } from "./routes/visible-alerts";
 
 export function createServer() {
   const app = express();
@@ -19,6 +20,9 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Public visible alerts (org or user/team filters)
+  app.get("/api/visible-alerts", getVisibleAlerts);
 
   // Admin routes
   app.post("/api/admin/users", adminCreateUser);
