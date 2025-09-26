@@ -147,7 +147,7 @@ export default function Index() {
                 <Card className="mb-4 p-4">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-sm text-muted-foreground">Sign in to manage alerts.</div>
-                    <EmailSignin />
+                    <PasswordAuth />
                   </div>
                 </Card>
               )}
