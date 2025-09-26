@@ -268,7 +268,7 @@ export default function Index() {
                           </div>
                         </div>
                         <div className="mt-2 text-xs text-muted-foreground">
-                          Reminder every {a.reminderFrequencyHours}h · {a.visibilityScope.toUpperCase()} visibility
+                          {renderReminderInfo(a, delivery)}
                         </div>
                       </div>
                     );
