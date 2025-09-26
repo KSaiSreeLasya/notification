@@ -31,8 +31,14 @@ export async function signOut() {
   await s.auth.signOut();
 }
 
-export async function signInWithEmail(email: string, redirectTo?: string) {
+export async function signUpWithPassword(email: string, password: string) {
   const s = getSupabase();
   if (!s) throw new Error("Supabase is not configured");
-  return s.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+  return s.auth.signUp({ email, password });
+}
+
+export async function signInWithPassword(email: string, password: string) {
+  const s = getSupabase();
+  if (!s) throw new Error("Supabase is not configured");
+  return s.auth.signInWithPassword({ email, password });
 }
