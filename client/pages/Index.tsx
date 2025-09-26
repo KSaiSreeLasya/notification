@@ -716,8 +716,7 @@ function AlertForm({
     setMessage(initial?.message ?? "");
     setSeverity(initial?.severity ?? "info");
     setVisibility(initial?.visibilityScope ?? "org");
-    setTeams(((initial?.teamIds ?? []) as string[]).join(", "));
-    setEmails(((initial?.userEmails ?? []) as string[]).join(", "));
+    setEmails(((initial?.userEmails ?? []) as string[]));
     setFreq(initial?.reminderFrequencyHours ?? 2);
     setExpires(initial?.expiresAt ? initial.expiresAt.slice(0, 16) : "");
     setActive(initial?.active ?? true);
