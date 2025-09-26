@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { signUpWithPassword, getCurrentSession } from "@/lib/supabase";
+import { signUpWithPassword, getCurrentSession, signInWithPassword } from "@/lib/supabase";
 import { upsertProfile } from "@/services/profiles";
 import { toast as sonnerToast } from "sonner";
 
@@ -66,10 +66,16 @@ export default function SignUpDialog() {
               onClick={async () => {
                 try {
                   setLoading(true);
-                  const res = await signUpWithPassword(email, password);
+                  await signUpWithPassword(email, password);
                   toast({ title: "Account created" });
                   sonnerToast.success(`Account created for ${email}`);
-                  const s = await getCurrentSession();
+                  let s = await getCurrentSession();
+                  if (!s) {
+                    try {
+                      await signInWithPassword(email, password);
+                      s = await getCurrentSession();
+                    } catch {}
+                  }
                   const uid = s?.user.id;
                   if (uid) {
                     if (username) {
@@ -78,15 +84,11 @@ export default function SignUpDialog() {
                       } catch {}
                     }
                   } else {
-                    // Likely email confirmation required; save username to apply after first sign-in
                     if (username)
                       localStorage.setItem(
                         `pending_profile_${email.toLowerCase()}`,
                         username,
                       );
-                    sonnerToast.message(
-                      "Please verify the email if required, then sign in.",
-                    );
                   }
                   setOpen(false);
                 } catch (e: any) {
