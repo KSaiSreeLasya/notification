@@ -732,20 +732,8 @@ function AlertForm({
           message,
           severity,
           visibilityScope: visibility,
-          teamIds:
-            visibility === "teams"
-              ? teams
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : null,
-          userEmails:
-            visibility === "users"
-              ? emails
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : null,
+          teamIds: null,
+          userEmails: visibility === "users" ? emails : null,
           reminderFrequencyHours: Number(freq) || 2,
           expiresAt: expires ? new Date(expires).toISOString() : null,
           active,
