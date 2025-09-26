@@ -327,10 +327,7 @@ export default function Index() {
                                 password: adminPassword,
                                 username: adminUsername || undefined,
                               });
-                              toast({ title: "User created" });
-                              sonnerToast.success(
-                                `User created: ${adminEmail}`,
-                              );
+                              sonnerToast.success(`User created: ${adminEmail}`);
                               setAddUserOpen(false);
                               setAdminEmail("");
                               setAdminPassword("");
