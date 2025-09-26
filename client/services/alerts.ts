@@ -66,7 +66,8 @@ export async function updateAlert(
   if (patch.visibilityScope !== undefined)
     payload.visibility_scope = patch.visibilityScope;
   if (patch.teamIds !== undefined) payload.team_ids = patch.teamIds ?? null;
-  if (patch.userEmails !== undefined) payload.user_emails = patch.userEmails ?? null;
+  if (patch.userEmails !== undefined)
+    payload.user_emails = patch.userEmails ?? null;
   if (patch.reminderFrequencyHours !== undefined)
     payload.reminder_frequency_hours = patch.reminderFrequencyHours;
   if (patch.expiresAt !== undefined) payload.expires_at = patch.expiresAt;
@@ -116,7 +117,9 @@ export async function getVisibleAlertsForUser(
       return (a.teamIds ?? []).includes(teamId ?? "");
     if (a.visibilityScope === "users")
       return userEmail
-        ? (a.userEmails ?? []).some((e) => (e || "").toLowerCase() === userEmail.toLowerCase())
+        ? (a.userEmails ?? []).some(
+            (e) => (e || "").toLowerCase() === userEmail.toLowerCase(),
+          )
         : false;
     return false;
   });

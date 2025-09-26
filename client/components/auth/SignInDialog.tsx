@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -27,34 +33,50 @@ export default function SignInDialog() {
         <div className="space-y-3">
           <div className="space-y-2">
             <Label htmlFor="signin-email">Email</Label>
-            <Input id="signin-email" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} />
+            <Input
+              id="signin-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="signin-password">Password</Label>
-            <Input id="signin-password" type="password" value={password} onChange={(e)=>setPassword(e.target.value)} />
+            <Input
+              id="signin-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <div className="flex justify-end">
             <Button
               disabled={!email || !password || loading}
-              onClick={async ()=>{
-                try{
+              onClick={async () => {
+                try {
                   setLoading(true);
-                  await signInWithPassword(email,password);
+                  await signInWithPassword(email, password);
                   toast({ title: "Signed in" });
                   sonnerToast.success(`Welcome ${email}`);
                   const s = await getCurrentSession();
                   const uid = s?.user.id;
                   const pendingKey = `pending_profile_${email.toLowerCase()}`;
                   const pendingUsername = localStorage.getItem(pendingKey);
-                  if(uid && pendingUsername){
-                    try{ await upsertProfile(uid, pendingUsername); } catch {}
+                  if (uid && pendingUsername) {
+                    try {
+                      await upsertProfile(uid, pendingUsername);
+                    } catch {}
                     localStorage.removeItem(pendingKey);
                   }
                   setOpen(false);
-                }catch(e: any){
-                  toast({ title: "Sign-in failed", description: e.message, variant: "destructive" });
+                } catch (e: any) {
+                  toast({
+                    title: "Sign-in failed",
+                    description: e.message,
+                    variant: "destructive",
+                  });
                   sonnerToast.error(`Sign-in failed: ${e.message}`);
-                }finally{
+                } finally {
                   setLoading(false);
                 }
               }}

@@ -171,7 +171,9 @@ export default function Index() {
 
   const toggleRead = (alertId: string, read: boolean) => {
     markAlertRead(sessionUserId!, alertId, read)
-      .then(() => qc.invalidateQueries({ queryKey: ["deliveries", sessionUserId] }))
+      .then(() =>
+        qc.invalidateQueries({ queryKey: ["deliveries", sessionUserId] }),
+      )
       .catch((e) =>
         toast({
           title: "Update failed",
@@ -250,9 +252,7 @@ export default function Index() {
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button disabled={!supabaseReady}>
-                      Create Alert
-                    </Button>
+                    <Button disabled={!supabaseReady}>Create Alert</Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-xl">
                     <DialogHeader>
@@ -370,7 +370,11 @@ export default function Index() {
                     {sessionUserId ? (
                       <div className="flex items-center gap-2">
                         <span>User ID: {sessionUserId.slice(0, 8)}…</span>
-                        <Button size="sm" variant="ghost" onClick={() => signOut()}>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => signOut()}
+                        >
                           Sign out
                         </Button>
                       </div>
@@ -378,7 +382,9 @@ export default function Index() {
                       <div className="flex items-center gap-2">
                         <SignInDialog />
                         <SignUpDialog />
-                        <span className="hidden sm:inline">Sign in or sign up to see targeted alerts</span>
+                        <span className="hidden sm:inline">
+                          Sign in or sign up to see targeted alerts
+                        </span>
                       </div>
                     )}
                   </div>
