@@ -286,6 +286,30 @@ export default function Index() {
   );
 }
 
+function EmailSignin() {
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  return (
+    <div className="flex items-center gap-2">
+      <Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-56" />
+      <Button size="sm" disabled={!email || sending} onClick={async () => {
+        try {
+          setSending(true);
+          const origin = window.location.origin;
+          await signInWithEmail(email, origin);
+          toast({ title: "Check your email", description: "Magic link sent." });
+        } catch (e: any) {
+          toast({ title: "Sign-in failed", description: e.message, variant: "destructive" });
+        } finally {
+          setSending(false);
+        }
+      }}>Sign in</Button>
+      <Button size="sm" variant="ghost" onClick={() => signOut()}>Sign out</Button>
+    </div>
+  );
+}
+
 function SeverityBadge({ s }: { s: Severity }) {
   const map: Record<Severity, string> = {
     info: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
