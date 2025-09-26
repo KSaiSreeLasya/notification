@@ -41,7 +41,14 @@ export default function SignInDialog() {
                   await signInWithPassword(email,password);
                   toast({ title: "Signed in" });
                   sonnerToast.success(`Welcome ${email}`);
-                  await getCurrentSession();
+                  const s = await getCurrentSession();
+                  const uid = s?.user.id;
+                  const pendingKey = `pending_profile_${email.toLowerCase()}`;
+                  const pendingUsername = localStorage.getItem(pendingKey);
+                  if(uid && pendingUsername){
+                    try{ await upsertProfile(uid, pendingUsername); } catch {}
+                    localStorage.removeItem(pendingKey);
+                  }
                   setOpen(false);
                 }catch(e: any){
                   toast({ title: "Sign-in failed", description: e.message, variant: "destructive" });
