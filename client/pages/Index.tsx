@@ -11,8 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { getCurrentUserId, getCurrentUserTeam, setCurrentUserTeam } from "@/lib/user";
+import { getSupabase, isSupabaseConfigured, getCurrentSession, signInWithEmail, signOut } from "@/lib/supabase";
+import { getCurrentUserTeam, setCurrentUserTeam } from "@/lib/user";
 import type { Alert, AlertInput, Severity } from "@shared/api";
 import { createAlert, deleteAlert, listAlerts, toggleAlertActive, updateAlert, getVisibleAlertsForUser, snoozeAlert, markAlertRead, getUserDeliveries } from "@/services/alerts";
 
@@ -21,23 +21,27 @@ export default function Index() {
   const { toast } = useToast();
   const qc = useQueryClient();
 
-  const userId = useMemo(() => getCurrentUserId(), []);
-  const [team, setTeam] = useState<string>(getCurrentUserTeam() ?? "");
-
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   useEffect(() => {
-    setCurrentUserTeam(team);
-  }, [team]);
+    if (!supabaseReady) return;
+    getCurrentSession().then((s) => setSessionUserId(s?.user.id ?? null));
+    const sub = getSupabase()!.auth.onAuthStateChange((_e, s) => setSessionUserId(s?.user?.id ?? null));
+    return () => sub.data.subscription.unsubscribe();
+  }, [supabaseReady]);
+
+  const [team, setTeam] = useState<string>(getCurrentUserTeam() ?? "");
+  useEffect(() => { setCurrentUserTeam(team); }, [team]);
 
   const alertsQuery = useQuery({
     queryKey: ["alerts"],
     queryFn: listAlerts,
-    enabled: supabaseReady,
+    enabled: supabaseReady && !!sessionUserId,
   });
 
   const deliveriesQuery = useQuery({
-    queryKey: ["deliveries", userId],
-    queryFn: () => getUserDeliveries(userId),
-    enabled: supabaseReady,
+    queryKey: ["deliveries", sessionUserId],
+    queryFn: () => getUserDeliveries(sessionUserId!),
+    enabled: supabaseReady && !!sessionUserId,
   });
 
   const [editing, setEditing] = useState<Alert | null>(null);
