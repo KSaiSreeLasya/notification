@@ -100,7 +100,7 @@ export async function toggleAlertActive(
 }
 
 export async function getVisibleAlertsForUser(
-  userId: string,
+  userId: string | null,
   teamId?: string | null,
 ): Promise<Alert[]> {
   const nowIso = new Date().toISOString();
@@ -115,7 +115,7 @@ export async function getVisibleAlertsForUser(
     if (a.visibilityScope === "teams")
       return (a.teamIds ?? []).includes(teamId ?? "");
     if (a.visibilityScope === "users")
-      return (a.userIds ?? []).includes(userId);
+      return userId ? (a.userIds ?? []).includes(userId) : false;
     return false;
   });
 }
