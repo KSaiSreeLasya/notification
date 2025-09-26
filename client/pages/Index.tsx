@@ -333,14 +333,7 @@ export default function Index() {
                               setAdminPassword("");
                               setAdminUsername("");
                             } catch (e: any) {
-                              toast({
-                                title: "Create user failed",
-                                description: e.message,
-                                variant: "destructive",
-                              });
-                              sonnerToast.error(
-                                `Create user failed: ${e.message}`,
-                              );
+                              sonnerToast.error(`Create user failed: ${e.message}`);
                             } finally {
                               setAdminLoading(false);
                             }
