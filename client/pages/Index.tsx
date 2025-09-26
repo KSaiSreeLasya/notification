@@ -22,6 +22,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +34,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import SignInDialog from "@/components/auth/SignInDialog";
 import { toast as sonnerToast } from "sonner";
-import { adminCreateUser } from "@/services/admin";
+import { adminCreateUser, adminListUsers } from "@/services/admin";
 import {
   getSupabase,
   isSupabaseConfigured,
