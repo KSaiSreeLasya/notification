@@ -30,6 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { toast as sonnerToast } from "sonner";
 import {
   getSupabase,
   isSupabaseConfigured,
@@ -368,9 +369,9 @@ export default function Index() {
                       <>User ID: {sessionUserId.slice(0, 8)}…</>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <PasswordAuth compact />
+                        <PasswordAuth />
                         <span className="hidden sm:inline">
-                          Sign in to see alerts
+                          Sign in or sign up to see targeted alerts
                         </span>
                       </div>
                     )}
@@ -494,6 +495,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
             setLoading(true);
             await signInWithPassword(email, password);
             toast({ title: "Signed in" });
+            sonnerToast.success(`Welcome ${email}`);
             await afterAuth();
           } catch (e: any) {
             toast({
@@ -501,6 +503,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
               description: e.message,
               variant: "destructive",
             });
+            sonnerToast.error(`Sign-in failed: ${e.message}`);
           } finally {
             setLoading(false);
           }
@@ -518,6 +521,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
               setLoading(true);
               await signUpWithPassword(email, password);
               toast({ title: "Account created" });
+              sonnerToast.success(`Account created for ${email}`);
               await afterAuth();
             } catch (e: any) {
               toast({
@@ -525,6 +529,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
                 description: e.message,
                 variant: "destructive",
               });
+              sonnerToast.error(`Sign-up failed: ${e.message}`);
             } finally {
               setLoading(false);
             }
