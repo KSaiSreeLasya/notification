@@ -78,16 +78,17 @@ export async function deleteAlert(id: string): Promise<void> {
 export async function toggleAlertActive(id: string, active: boolean): Promise<Alert> {
   const { data, error } = await table().update({ active }).eq("id", id).select().single();
   if (error) throw error;
-  return data as any as Alert;
+  return toAlert(data);
 }
 
 export async function getVisibleAlertsForUser(userId: string, teamId?: string | null): Promise<Alert[]> {
-  // Active, not expired, and visible by scope
   const nowIso = new Date().toISOString();
-  let query = table().select("*").eq("active", true).or(`expires_at.is.null,expires_at.gt.${nowIso}`);
-  const { data, error } = await query;
+  const { data, error } = await table()
+    .select("*")
+    .eq("active", true)
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
   if (error) throw error;
-  const all = (data as any) as Alert[];
+  const all = ((data as any[]) || []).map(toAlert);
   return all.filter((a) => {
     if (a.visibilityScope === "org") return true;
     if (a.visibilityScope === "teams") return (a.teamIds ?? []).includes(teamId ?? "");
