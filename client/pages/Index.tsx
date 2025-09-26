@@ -414,7 +414,7 @@ function AlertForm({ initial, onSubmit }: { initial?: Alert; onSubmit: (values: 
         </div>
         <div className="space-y-2">
           <Label htmlFor="expires">Expires At</Label>
-          <Input id="expires" type="datetime-local" value={expires} onChange={(e) => setExpires(e.target.value)} />
+          <Input id="expires" type="datetime-local" step={60} value={expires} onChange={(e) => setExpires(e.target.value)} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="active">Status</Label>
