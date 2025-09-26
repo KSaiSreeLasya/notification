@@ -31,8 +31,8 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import SignInDialog from "@/components/auth/SignInDialog";
-import SignUpDialog from "@/components/auth/SignUpDialog";
 import { toast as sonnerToast } from "sonner";
+import { adminCreateUser } from "@/services/admin";
 import {
   getSupabase,
   isSupabaseConfigured,
@@ -95,6 +95,11 @@ export default function Index() {
 
   const [editing, setEditing] = useState<Alert | null>(null);
   const [open, setOpen] = useState(false);
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminUsername, setAdminUsername] = useState("");
+  const [adminLoading, setAdminLoading] = useState(false);
 
   const createMut = useMutation({
     mutationFn: (body: AlertInput) => createAlert(body),
@@ -270,6 +275,55 @@ export default function Index() {
                     />
                   </DialogContent>
                 </Dialog>
+
+                <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="secondary">Add User</Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                      <DialogTitle>Add User (Admin)</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="admin-username">Username (optional)</Label>
+                        <Input id="admin-username" value={adminUsername} onChange={(e) => setAdminUsername(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="admin-email">Email</Label>
+                        <Input id="admin-email" type="email" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="admin-password">Password</Label>
+                        <Input id="admin-password" type="password" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          disabled={!adminEmail || !adminPassword || adminLoading}
+                          onClick={async () => {
+                            try {
+                              setAdminLoading(true);
+                              await adminCreateUser({ email: adminEmail, password: adminPassword, username: adminUsername || undefined });
+                              toast({ title: "User created" });
+                              sonnerToast.success(`User created: ${adminEmail}`);
+                              setAddUserOpen(false);
+                              setAdminEmail("");
+                              setAdminPassword("");
+                              setAdminUsername("");
+                            } catch (e: any) {
+                              toast({ title: "Create user failed", description: e.message, variant: "destructive" });
+                              sonnerToast.error(`Create user failed: ${e.message}`);
+                            } finally {
+                              setAdminLoading(false);
+                            }
+                          }}
+                        >
+                          Create
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <Card className="mt-4">
@@ -381,10 +435,7 @@ export default function Index() {
                     ) : (
                       <div className="flex items-center gap-2">
                         <SignInDialog />
-                        <SignUpDialog />
-                        <span className="hidden sm:inline">
-                          Sign in or sign up to see targeted alerts
-                        </span>
+                        <span className="hidden sm:inline">Sign in with credentials provided by admin</span>
                       </div>
                     )}
                   </div>
