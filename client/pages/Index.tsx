@@ -236,7 +236,13 @@ export default function Index() {
                     <Label htmlFor="team">Team</Label>
                     <Input id="team" placeholder="e.g., engineering" className="w-48" value={team} onChange={(e) => setTeam(e.target.value)} />
                   </div>
-                  <div className="text-sm text-muted-foreground">User ID: {userId.slice(0, 8)}…</div>
+                  <div className="text-sm text-muted-foreground">
+                    {sessionUserId ? (
+                      <>User ID: {sessionUserId.slice(0, 8)}…</>
+                    ) : (
+                      <div className="flex items-center gap-2"><EmailSignin /><span className="hidden sm:inline">Sign in to see alerts</span></div>
+                    )}
+                  </div>
                 </div>
                 <div className="p-4 pt-0 space-y-3">
                   {(visibleAlertsQuery.data ?? []).map((a) => {
@@ -267,7 +273,7 @@ export default function Index() {
                       </div>
                     );
                   })}
-                  {supabaseReady && (visibleAlertsQuery.data ?? []).length === 0 && (
+                  {supabaseReady && sessionUserId && (visibleAlertsQuery.data ?? []).length === 0 && (
                     <div className="text-sm text-muted-foreground">No active alerts.</div>
                   )}
                 </div>
