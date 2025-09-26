@@ -32,6 +32,9 @@ export const getVisibleAlerts: RequestHandler = async (req, res) => {
 
     if (error) return res.status(400).json({ error: error.message });
 
+    console.log("[visible-alerts] params", { email, team, uid });
+    console.log("[visible-alerts] total rows", (data as any[])?.length || 0);
+
     const rows = (data as any[]) || [];
     const visible = rows.filter((row) => {
       const scope = row.visibility_scope as string;
