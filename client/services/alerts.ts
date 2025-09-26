@@ -103,26 +103,18 @@ export async function toggleAlertActive(
 export async function getVisibleAlertsForUser(
   userEmail: string | null,
   teamId?: string | null,
+  userId?: string | null,
 ): Promise<Alert[]> {
-  const nowIso = new Date().toISOString();
-  const { data, error } = await table()
-    .select("*")
-    .eq("active", true)
-    .or(`expires_at.is.null,expires_at.gt.${nowIso}`);
-  if (error) throw error;
-  const all = ((data as any[]) || []).map(toAlert);
-  return all.filter((a) => {
-    if (a.visibilityScope === "org") return true;
-    if (a.visibilityScope === "teams")
-      return (a.teamIds ?? []).includes(teamId ?? "");
-    if (a.visibilityScope === "users")
-      return userEmail
-        ? (a.userEmails ?? []).some(
-            (e) => (e || "").toLowerCase() === userEmail.toLowerCase(),
-          )
-        : false;
-    return false;
-  });
+  const params = new URLSearchParams();
+  if (userEmail) params.set("email", userEmail);
+  if (teamId) params.set("team", teamId);
+  if (userId) params.set("uid", userId);
+  const res = await fetch(`/api/visible-alerts?${params.toString()}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Request failed (${res.status})`);
+  }
+  return (await res.json()) as Alert[];
 }
 
 export async function getDelivery(
