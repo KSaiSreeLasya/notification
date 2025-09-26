@@ -195,7 +195,7 @@ export default function Index() {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl">
             <Badge className="mb-3">PRD</Badge>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60 pb-4">
               Alerting & Notification Platform
             </h1>
             <p className="mt-4 text-muted-foreground text-lg">
