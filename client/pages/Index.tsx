@@ -102,7 +102,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/40">
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-3xl">
             <Badge className="mb-3">PRD</Badge>
