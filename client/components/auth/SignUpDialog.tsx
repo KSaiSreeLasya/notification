@@ -49,8 +49,12 @@ export default function SignUpDialog() {
                   sonnerToast.success(`Account created for ${email}`);
                   const s = await getCurrentSession();
                   const uid = s?.user.id;
-                  if(uid && username){
-                    try{ await upsertProfile(uid, username);}catch{}
+                  if(uid){
+                    if(username){ try{ await upsertProfile(uid, username);}catch{} }
+                  } else {
+                    // Likely email confirmation required; save username to apply after first sign-in
+                    if (username) localStorage.setItem(`pending_profile_${email.toLowerCase()}`, username);
+                    sonnerToast.message("Please verify the email if required, then sign in.");
                   }
                   setOpen(false);
                 }catch(e:any){
