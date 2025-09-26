@@ -241,7 +241,7 @@ export default function Index() {
                     {sessionUserId ? (
                       <>User ID: {sessionUserId.slice(0, 8)}…</>
                     ) : (
-                      <div className="flex items-center gap-2"><EmailSignin /><span className="hidden sm:inline">Sign in to see alerts</span></div>
+                      <div className="flex items-center gap-2"><PasswordAuth compact /><span className="hidden sm:inline">Sign in to see alerts</span></div>
                     )}
                   </div>
                 </div>
