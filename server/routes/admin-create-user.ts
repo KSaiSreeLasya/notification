@@ -12,9 +12,7 @@ export const adminCreateUser: RequestHandler = async (req, res) => {
       return res.status(400).json({ error: "email and password are required" });
     }
 
-    const url = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL) as
-      | string
-      | undefined;
+    const url = (process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL) as string | undefined;
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as
       | string
       | undefined;
@@ -40,9 +38,11 @@ export const adminCreateUser: RequestHandler = async (req, res) => {
 
     if (user && username) {
       // best-effort: upsert profile
-      await admin
+      const { error: profErr } = await admin
         .from("profiles")
         .upsert({ user_id: user.id, username }, { onConflict: "user_id" });
+      // Don't fail user creation if profile table isn't present
+      if (profErr) console.warn("profiles upsert skipped:", profErr.message);
     }
 
     return res.json({ user });
