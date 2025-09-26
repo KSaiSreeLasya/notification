@@ -30,6 +30,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import SignInDialog from "@/components/auth/SignInDialog";
+import SignUpDialog from "@/components/auth/SignUpDialog";
+import { toast as sonnerToast } from "sonner";
 import {
   getSupabase,
   isSupabaseConfigured,
@@ -59,12 +62,17 @@ export default function Index() {
   const qc = useQueryClient();
 
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   useEffect(() => {
     if (!supabaseReady) return;
-    getCurrentSession().then((s) => setSessionUserId(s?.user.id ?? null));
-    const sub = getSupabase()!.auth.onAuthStateChange((_e, s) =>
-      setSessionUserId(s?.user?.id ?? null),
-    );
+    getCurrentSession().then((s) => {
+      setSessionUserId(s?.user.id ?? null);
+      setSessionEmail(s?.user.email ?? null);
+    });
+    const sub = getSupabase()!.auth.onAuthStateChange((_e, s) => {
+      setSessionUserId(s?.user?.id ?? null);
+      setSessionEmail(s?.user?.email ?? null);
+    });
     return () => sub.data.subscription.unsubscribe();
   }, [supabaseReady]);
 
@@ -76,7 +84,7 @@ export default function Index() {
   const alertsQuery = useQuery({
     queryKey: ["alerts"],
     queryFn: listAlerts,
-    enabled: supabaseReady && !!sessionUserId,
+    enabled: supabaseReady,
   });
 
   const deliveriesQuery = useQuery({
@@ -139,17 +147,17 @@ export default function Index() {
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
 
   const visibleAlertsQuery = useQuery({
-    queryKey: ["visible-alerts", sessionUserId, team],
-    queryFn: () => getVisibleAlertsForUser(sessionUserId!, team || null),
-    enabled: supabaseReady && !!sessionUserId,
+    queryKey: ["visible-alerts", sessionEmail, team],
+    queryFn: () => getVisibleAlertsForUser(sessionEmail ?? null, team || null),
+    enabled: supabaseReady,
   });
 
   const snoozeToday = (alertId: string) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
-    snoozeAlert(userId, alertId, endOfDay.toISOString())
+    snoozeAlert(sessionUserId!, alertId, endOfDay.toISOString())
       .then(() => {
-        qc.invalidateQueries({ queryKey: ["deliveries", userId] });
+        qc.invalidateQueries({ queryKey: ["deliveries", sessionUserId] });
         toast({ title: "Snoozed until tomorrow" });
       })
       .catch((e) =>
@@ -162,8 +170,10 @@ export default function Index() {
   };
 
   const toggleRead = (alertId: string, read: boolean) => {
-    markAlertRead(userId, alertId, read)
-      .then(() => qc.invalidateQueries({ queryKey: ["deliveries", userId] }))
+    markAlertRead(sessionUserId!, alertId, read)
+      .then(() =>
+        qc.invalidateQueries({ queryKey: ["deliveries", sessionUserId] }),
+      )
       .catch((e) =>
         toast({
           title: "Update failed",
@@ -216,16 +226,6 @@ export default function Index() {
             )}
 
             <TabsContent value="admin" className="mt-6">
-              {!sessionUserId && (
-                <Card className="mb-4 p-4">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      Sign in to manage alerts.
-                    </div>
-                    <PasswordAuth />
-                  </div>
-                </Card>
-              )}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Label className="text-sm">Severity</Label>
@@ -252,9 +252,7 @@ export default function Index() {
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button disabled={!supabaseReady || !sessionUserId}>
-                      Create Alert
-                    </Button>
+                    <Button disabled={!supabaseReady}>Create Alert</Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-xl">
                     <DialogHeader>
@@ -370,12 +368,22 @@ export default function Index() {
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {sessionUserId ? (
-                      <>User ID: {sessionUserId.slice(0, 8)}…</>
+                      <div className="flex items-center gap-2">
+                        <span>User ID: {sessionUserId.slice(0, 8)}…</span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => signOut()}
+                        >
+                          Sign out
+                        </Button>
+                      </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <PasswordAuth compact />
+                        <SignInDialog />
+                        <SignUpDialog />
                         <span className="hidden sm:inline">
-                          Sign in to see alerts
+                          Sign in or sign up to see targeted alerts
                         </span>
                       </div>
                     )}
@@ -410,6 +418,7 @@ export default function Index() {
                               onClick={() =>
                                 toggleRead(a.id, !(delivery?.read ?? false))
                               }
+                              disabled={!sessionUserId}
                             >
                               {(delivery?.read ?? false)
                                 ? "Mark Unread"
@@ -419,7 +428,7 @@ export default function Index() {
                               variant="default"
                               size="sm"
                               onClick={() => snoozeToday(a.id)}
-                              disabled={snoozed}
+                              disabled={snoozed || !sessionUserId}
                             >
                               {snoozed ? "Snoozed" : "Snooze Today"}
                             </Button>
@@ -432,7 +441,6 @@ export default function Index() {
                     );
                   })}
                   {supabaseReady &&
-                    sessionUserId &&
                     (visibleAlertsQuery.data ?? []).length === 0 && (
                       <div className="text-sm text-muted-foreground">
                         No active alerts.
@@ -499,6 +507,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
             setLoading(true);
             await signInWithPassword(email, password);
             toast({ title: "Signed in" });
+            sonnerToast.success(`Welcome ${email}`);
             await afterAuth();
           } catch (e: any) {
             toast({
@@ -506,6 +515,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
               description: e.message,
               variant: "destructive",
             });
+            sonnerToast.error(`Sign-in failed: ${e.message}`);
           } finally {
             setLoading(false);
           }
@@ -523,6 +533,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
               setLoading(true);
               await signUpWithPassword(email, password);
               toast({ title: "Account created" });
+              sonnerToast.success(`Account created for ${email}`);
               await afterAuth();
             } catch (e: any) {
               toast({
@@ -530,6 +541,7 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
                 description: e.message,
                 variant: "destructive",
               });
+              sonnerToast.error(`Sign-up failed: ${e.message}`);
             } finally {
               setLoading(false);
             }
@@ -614,8 +626,8 @@ function AlertForm({
   const [teams, setTeams] = useState<string>(
     (initial?.teamIds ?? [])?.join(", ") ?? "",
   );
-  const [users, setUsers] = useState<string>(
-    (initial?.userIds ?? [])?.join(", ") ?? "",
+  const [emails, setEmails] = useState<string>(
+    (initial?.userEmails ?? [])?.join(", ") ?? "",
   );
   const [freq, setFreq] = useState<number>(
     initial?.reminderFrequencyHours ?? 2,
@@ -631,7 +643,7 @@ function AlertForm({
     setSeverity(initial?.severity ?? "info");
     setVisibility(initial?.visibilityScope ?? "org");
     setTeams(((initial?.teamIds ?? []) as string[]).join(", "));
-    setUsers(((initial?.userIds ?? []) as string[]).join(", "));
+    setEmails(((initial?.userEmails ?? []) as string[]).join(", "));
     setFreq(initial?.reminderFrequencyHours ?? 2);
     setExpires(initial?.expiresAt ? initial.expiresAt.slice(0, 16) : "");
     setActive(initial?.active ?? true);
@@ -654,9 +666,9 @@ function AlertForm({
                   .map((s) => s.trim())
                   .filter(Boolean)
               : null,
-          userIds:
+          userEmails:
             visibility === "users"
-              ? users
+              ? emails
                   .split(",")
                   .map((s) => s.trim())
                   .filter(Boolean)
@@ -733,12 +745,12 @@ function AlertForm({
         )}
         {visibility === "users" && (
           <div className="space-y-2">
-            <Label htmlFor="users">User IDs (comma-separated)</Label>
+            <Label htmlFor="emails">User Emails (comma-separated)</Label>
             <Input
-              id="users"
-              placeholder="uuid-1, uuid-2"
-              value={users}
-              onChange={(e) => setUsers(e.target.value)}
+              id="emails"
+              placeholder="a@company.com, b@company.com"
+              value={emails}
+              onChange={(e) => setEmails(e.target.value)}
             />
           </div>
         )}

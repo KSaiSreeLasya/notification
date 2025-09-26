@@ -21,7 +21,7 @@ function toAlert(row: any): Alert {
     severity: row.severity,
     visibilityScope: row.visibility_scope,
     teamIds: row.team_ids,
-    userIds: row.user_ids,
+    userEmails: row.user_emails,
     reminderFrequencyHours: row.reminder_frequency_hours,
     expiresAt: row.expires_at,
     active: row.active,
@@ -45,7 +45,7 @@ export async function createAlert(input: AlertInput): Promise<Alert> {
     severity: input.severity,
     visibility_scope: input.visibilityScope,
     team_ids: input.teamIds ?? null,
-    user_ids: input.userIds ?? null,
+    user_emails: input.userEmails ?? null,
     reminder_frequency_hours: input.reminderFrequencyHours ?? 2,
     expires_at: input.expiresAt ?? null,
     active: input.active ?? true,
@@ -66,7 +66,8 @@ export async function updateAlert(
   if (patch.visibilityScope !== undefined)
     payload.visibility_scope = patch.visibilityScope;
   if (patch.teamIds !== undefined) payload.team_ids = patch.teamIds ?? null;
-  if (patch.userIds !== undefined) payload.user_ids = patch.userIds ?? null;
+  if (patch.userEmails !== undefined)
+    payload.user_emails = patch.userEmails ?? null;
   if (patch.reminderFrequencyHours !== undefined)
     payload.reminder_frequency_hours = patch.reminderFrequencyHours;
   if (patch.expiresAt !== undefined) payload.expires_at = patch.expiresAt;
@@ -100,7 +101,7 @@ export async function toggleAlertActive(
 }
 
 export async function getVisibleAlertsForUser(
-  userId: string,
+  userEmail: string | null,
   teamId?: string | null,
 ): Promise<Alert[]> {
   const nowIso = new Date().toISOString();
@@ -115,7 +116,11 @@ export async function getVisibleAlertsForUser(
     if (a.visibilityScope === "teams")
       return (a.teamIds ?? []).includes(teamId ?? "");
     if (a.visibilityScope === "users")
-      return (a.userIds ?? []).includes(userId);
+      return userEmail
+        ? (a.userEmails ?? []).some(
+            (e) => (e || "").toLowerCase() === userEmail.toLowerCase(),
+          )
+        : false;
     return false;
   });
 }

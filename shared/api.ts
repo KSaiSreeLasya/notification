@@ -21,7 +21,7 @@ export interface Alert {
   severity: Severity;
   visibilityScope: VisibilityScope;
   teamIds: string[] | null;
-  userIds: string[] | null;
+  userEmails: string[] | null;
   reminderFrequencyHours: number;
   expiresAt: string | null;
   active: boolean;
@@ -35,7 +35,7 @@ export interface AlertInput {
   severity: Severity;
   visibilityScope: VisibilityScope;
   teamIds?: string[] | null;
-  userIds?: string[] | null;
+  userEmails?: string[] | null;
   reminderFrequencyHours?: number;
   expiresAt?: string | null;
   active?: boolean;

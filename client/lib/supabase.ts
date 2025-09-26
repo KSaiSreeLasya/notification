@@ -40,11 +40,15 @@ export async function signOut() {
 export async function signUpWithPassword(email: string, password: string) {
   const s = getSupabase();
   if (!s) throw new Error("Supabase is not configured");
-  return s.auth.signUp({ email, password });
+  const { data, error } = await s.auth.signUp({ email, password });
+  if (error) throw error;
+  return data;
 }
 
 export async function signInWithPassword(email: string, password: string) {
   const s = getSupabase();
   if (!s) throw new Error("Supabase is not configured");
-  return s.auth.signInWithPassword({ email, password });
+  const { data, error } = await s.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  return data;
 }
