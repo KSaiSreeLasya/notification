@@ -59,12 +59,17 @@ export default function Index() {
   const qc = useQueryClient();
 
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   useEffect(() => {
     if (!supabaseReady) return;
-    getCurrentSession().then((s) => setSessionUserId(s?.user.id ?? null));
-    const sub = getSupabase()!.auth.onAuthStateChange((_e, s) =>
-      setSessionUserId(s?.user?.id ?? null),
-    );
+    getCurrentSession().then((s) => {
+      setSessionUserId(s?.user.id ?? null);
+      setSessionEmail(s?.user.email ?? null);
+    });
+    const sub = getSupabase()!.auth.onAuthStateChange((_e, s) => {
+      setSessionUserId(s?.user?.id ?? null);
+      setSessionEmail(s?.user?.email ?? null);
+    });
     return () => sub.data.subscription.unsubscribe();
   }, [supabaseReady]);
 
@@ -139,8 +144,8 @@ export default function Index() {
   const [filterSeverity, setFilterSeverity] = useState<string>("all");
 
   const visibleAlertsQuery = useQuery({
-    queryKey: ["visible-alerts", sessionUserId, team],
-    queryFn: () => getVisibleAlertsForUser(sessionUserId ?? null, team || null),
+    queryKey: ["visible-alerts", sessionEmail, team],
+    queryFn: () => getVisibleAlertsForUser(sessionEmail ?? null, team || null),
     enabled: supabaseReady,
   });
 
@@ -604,8 +609,8 @@ function AlertForm({
   const [teams, setTeams] = useState<string>(
     (initial?.teamIds ?? [])?.join(", ") ?? "",
   );
-  const [users, setUsers] = useState<string>(
-    (initial?.userIds ?? [])?.join(", ") ?? "",
+  const [emails, setEmails] = useState<string>(
+    (initial?.userEmails ?? [])?.join(", ") ?? "",
   );
   const [freq, setFreq] = useState<number>(
     initial?.reminderFrequencyHours ?? 2,
@@ -621,7 +626,7 @@ function AlertForm({
     setSeverity(initial?.severity ?? "info");
     setVisibility(initial?.visibilityScope ?? "org");
     setTeams(((initial?.teamIds ?? []) as string[]).join(", "));
-    setUsers(((initial?.userIds ?? []) as string[]).join(", "));
+    setEmails(((initial?.userEmails ?? []) as string[]).join(", "));
     setFreq(initial?.reminderFrequencyHours ?? 2);
     setExpires(initial?.expiresAt ? initial.expiresAt.slice(0, 16) : "");
     setActive(initial?.active ?? true);
@@ -644,9 +649,9 @@ function AlertForm({
                   .map((s) => s.trim())
                   .filter(Boolean)
               : null,
-          userIds:
+          userEmails:
             visibility === "users"
-              ? users
+              ? emails
                   .split(",")
                   .map((s) => s.trim())
                   .filter(Boolean)
@@ -723,12 +728,12 @@ function AlertForm({
         )}
         {visibility === "users" && (
           <div className="space-y-2">
-            <Label htmlFor="users">User IDs (comma-separated)</Label>
+            <Label htmlFor="emails">User Emails (comma-separated)</Label>
             <Input
-              id="users"
-              placeholder="uuid-1, uuid-2"
-              value={users}
-              onChange={(e) => setUsers(e.target.value)}
+              id="emails"
+              placeholder="a@company.com, b@company.com"
+              value={emails}
+              onChange={(e) => setEmails(e.target.value)}
             />
           </div>
         )}
