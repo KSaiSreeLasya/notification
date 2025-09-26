@@ -6,15 +6,51 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { getSupabase, isSupabaseConfigured, getCurrentSession, signUpWithPassword, signInWithPassword, signOut } from "@/lib/supabase";
+import {
+  getSupabase,
+  isSupabaseConfigured,
+  getCurrentSession,
+  signUpWithPassword,
+  signInWithPassword,
+  signOut,
+} from "@/lib/supabase";
 import { getCurrentUserTeam, setCurrentUserTeam } from "@/lib/user";
 import type { Alert, AlertInput, Severity } from "@shared/api";
-import { createAlert, deleteAlert, listAlerts, toggleAlertActive, updateAlert, getVisibleAlertsForUser, snoozeAlert, markAlertRead, getUserDeliveries } from "@/services/alerts";
+import {
+  createAlert,
+  deleteAlert,
+  listAlerts,
+  toggleAlertActive,
+  updateAlert,
+  getVisibleAlertsForUser,
+  snoozeAlert,
+  markAlertRead,
+  getUserDeliveries,
+} from "@/services/alerts";
 import { upsertProfile } from "@/services/profiles";
 
 export default function Index() {
@@ -26,12 +62,16 @@ export default function Index() {
   useEffect(() => {
     if (!supabaseReady) return;
     getCurrentSession().then((s) => setSessionUserId(s?.user.id ?? null));
-    const sub = getSupabase()!.auth.onAuthStateChange((_e, s) => setSessionUserId(s?.user?.id ?? null));
+    const sub = getSupabase()!.auth.onAuthStateChange((_e, s) =>
+      setSessionUserId(s?.user?.id ?? null),
+    );
     return () => sub.data.subscription.unsubscribe();
   }, [supabaseReady]);
 
   const [team, setTeam] = useState<string>(getCurrentUserTeam() ?? "");
-  useEffect(() => { setCurrentUserTeam(team); }, [team]);
+  useEffect(() => {
+    setCurrentUserTeam(team);
+  }, [team]);
 
   const alertsQuery = useQuery({
     queryKey: ["alerts"],
@@ -55,16 +95,27 @@ export default function Index() {
       toast({ title: "Alert created" });
       setOpen(false);
     },
-    onError: (e: any) => toast({ title: "Create failed", description: e.message, variant: "destructive" }),
+    onError: (e: any) =>
+      toast({
+        title: "Create failed",
+        description: e.message,
+        variant: "destructive",
+      }),
   });
   const updateMut = useMutation({
-    mutationFn: (p: { id: string; patch: Partial<AlertInput> }) => updateAlert(p.id, p.patch),
+    mutationFn: (p: { id: string; patch: Partial<AlertInput> }) =>
+      updateAlert(p.id, p.patch),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["alerts"] });
       toast({ title: "Alert updated" });
       setOpen(false);
     },
-    onError: (e: any) => toast({ title: "Update failed", description: e.message, variant: "destructive" }),
+    onError: (e: any) =>
+      toast({
+        title: "Update failed",
+        description: e.message,
+        variant: "destructive",
+      }),
   });
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteAlert(id),
@@ -72,10 +123,16 @@ export default function Index() {
       qc.invalidateQueries({ queryKey: ["alerts"] });
       toast({ title: "Alert deleted" });
     },
-    onError: (e: any) => toast({ title: "Delete failed", description: e.message, variant: "destructive" }),
+    onError: (e: any) =>
+      toast({
+        title: "Delete failed",
+        description: e.message,
+        variant: "destructive",
+      }),
   });
   const toggleMut = useMutation({
-    mutationFn: (p: { id: string; active: boolean }) => toggleAlertActive(p.id, p.active),
+    mutationFn: (p: { id: string; active: boolean }) =>
+      toggleAlertActive(p.id, p.active),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alerts"] }),
   });
 
@@ -95,13 +152,25 @@ export default function Index() {
         qc.invalidateQueries({ queryKey: ["deliveries", userId] });
         toast({ title: "Snoozed until tomorrow" });
       })
-      .catch((e) => toast({ title: "Snooze failed", description: e.message, variant: "destructive" }));
+      .catch((e) =>
+        toast({
+          title: "Snooze failed",
+          description: e.message,
+          variant: "destructive",
+        }),
+      );
   };
 
   const toggleRead = (alertId: string, read: boolean) => {
     markAlertRead(userId, alertId, read)
       .then(() => qc.invalidateQueries({ queryKey: ["deliveries", userId] }))
-      .catch((e) => toast({ title: "Update failed", description: e.message, variant: "destructive" }));
+      .catch((e) =>
+        toast({
+          title: "Update failed",
+          description: e.message,
+          variant: "destructive",
+        }),
+      );
   };
 
   return (
@@ -115,7 +184,9 @@ export default function Index() {
               Alerting & Notification Platform
             </h1>
             <p className="mt-4 text-muted-foreground text-lg">
-              Create, manage, and deliver time-critical alerts across your organization. Admins craft alerts; users receive, snooze, and track them.
+              Create, manage, and deliver time-critical alerts across your
+              organization. Admins craft alerts; users receive, snooze, and
+              track them.
             </p>
           </div>
 
@@ -123,7 +194,9 @@ export default function Index() {
             <Card className="mt-8 p-4 border-destructive/40 bg-destructive/5">
               <h3 className="font-semibold mb-1">Supabase not connected</h3>
               <p className="text-sm text-muted-foreground">
-                Connect Supabase to persist alerts. Click Open MCP popover and connect to Supabase, then set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in project env.
+                Connect Supabase to persist alerts. Click Open MCP popover and
+                connect to Supabase, then set VITE_SUPABASE_URL and
+                VITE_SUPABASE_ANON_KEY in project env.
               </p>
             </Card>
           )}
@@ -146,7 +219,9 @@ export default function Index() {
               {!sessionUserId && (
                 <Card className="mb-4 p-4">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-muted-foreground">Sign in to manage alerts.</div>
+                    <div className="text-sm text-muted-foreground">
+                      Sign in to manage alerts.
+                    </div>
                     <PasswordAuth />
                   </div>
                 </Card>
@@ -154,7 +229,10 @@ export default function Index() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Label className="text-sm">Severity</Label>
-                  <Select value={filterSeverity} onValueChange={setFilterSeverity}>
+                  <Select
+                    value={filterSeverity}
+                    onValueChange={setFilterSeverity}
+                  >
                     <SelectTrigger className="w-36">
                       <SelectValue />
                     </SelectTrigger>
@@ -166,18 +244,29 @@ export default function Index() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
+                <Dialog
+                  open={open}
+                  onOpenChange={(o) => {
+                    setOpen(o);
+                    if (!o) setEditing(null);
+                  }}
+                >
                   <DialogTrigger asChild>
-                    <Button disabled={!supabaseReady || !sessionUserId}>Create Alert</Button>
+                    <Button disabled={!supabaseReady || !sessionUserId}>
+                      Create Alert
+                    </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-xl">
                     <DialogHeader>
-                      <DialogTitle>{editing ? "Edit Alert" : "New Alert"}</DialogTitle>
+                      <DialogTitle>
+                        {editing ? "Edit Alert" : "New Alert"}
+                      </DialogTitle>
                     </DialogHeader>
                     <AlertForm
                       initial={editing ?? undefined}
                       onSubmit={(values) => {
-                        if (editing) updateMut.mutate({ id: editing.id, patch: values });
+                        if (editing)
+                          updateMut.mutate({ id: editing.id, patch: values });
                         else createMut.mutate(values);
                       }}
                     />
@@ -199,28 +288,64 @@ export default function Index() {
                     </TableHeader>
                     <TableBody>
                       {(alertsQuery.data ?? [])
-                        .filter((a) => (filterSeverity === "all" ? true : a.severity === (filterSeverity as Severity)))
+                        .filter((a) =>
+                          filterSeverity === "all"
+                            ? true
+                            : a.severity === (filterSeverity as Severity),
+                        )
                         .map((a) => (
                           <TableRow key={a.id}>
                             <TableCell>
                               <div className="font-medium">{a.title}</div>
-                              <div className="text-sm text-muted-foreground line-clamp-1">{a.message}</div>
+                              <div className="text-sm text-muted-foreground line-clamp-1">
+                                {a.message}
+                              </div>
                             </TableCell>
                             <TableCell>
                               <SeverityBadge s={a.severity} />
                             </TableCell>
                             <TableCell>
-                              <span className="text-sm capitalize">{a.visibilityScope}</span>
+                              <span className="text-sm capitalize">
+                                {a.visibilityScope}
+                              </span>
                             </TableCell>
                             <TableCell>
-                              {a.active ? <Badge>Active</Badge> : <Badge variant="secondary">Inactive</Badge>}
+                              {a.active ? (
+                                <Badge>Active</Badge>
+                              ) : (
+                                <Badge variant="secondary">Inactive</Badge>
+                              )}
                             </TableCell>
                             <TableCell className="text-right space-x-2">
-                              <Button variant="outline" size="sm" onClick={() => { setEditing(a); setOpen(true); }}>Edit</Button>
-                              <Button variant="ghost" size="sm" onClick={() => toggleMut.mutate({ id: a.id, active: !a.active })}>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditing(a);
+                                  setOpen(true);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  toggleMut.mutate({
+                                    id: a.id,
+                                    active: !a.active,
+                                  })
+                                }
+                              >
                                 {a.active ? "Disable" : "Enable"}
                               </Button>
-                              <Button variant="destructive" size="sm" onClick={() => deleteMut.mutate(a.id)}>Delete</Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => deleteMut.mutate(a.id)}
+                              >
+                                Delete
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -235,35 +360,67 @@ export default function Index() {
                 <div className="p-4 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="team">Team</Label>
-                    <Input id="team" placeholder="e.g., engineering" className="w-48" value={team} onChange={(e) => setTeam(e.target.value)} />
+                    <Input
+                      id="team"
+                      placeholder="e.g., engineering"
+                      className="w-48"
+                      value={team}
+                      onChange={(e) => setTeam(e.target.value)}
+                    />
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {sessionUserId ? (
                       <>User ID: {sessionUserId.slice(0, 8)}…</>
                     ) : (
-                      <div className="flex items-center gap-2"><PasswordAuth compact /><span className="hidden sm:inline">Sign in to see alerts</span></div>
+                      <div className="flex items-center gap-2">
+                        <PasswordAuth compact />
+                        <span className="hidden sm:inline">
+                          Sign in to see alerts
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
                 <div className="p-4 pt-0 space-y-3">
                   {(visibleAlertsQuery.data ?? []).map((a) => {
-                    const delivery = deliveriesQuery.data?.find((d) => d.alert_id === a.id);
-                    const snoozed = delivery?.snoozed_until ? new Date(delivery.snoozed_until) > new Date() : false;
+                    const delivery = deliveriesQuery.data?.find(
+                      (d) => d.alert_id === a.id,
+                    );
+                    const snoozed = delivery?.snoozed_until
+                      ? new Date(delivery.snoozed_until) > new Date()
+                      : false;
                     return (
                       <div key={a.id} className="rounded-lg border p-4 bg-card">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <div className="flex items-center gap-2">
                               <SeverityBadge s={a.severity} />
-                              <h3 className="font-semibold text-lg">{a.title}</h3>
+                              <h3 className="font-semibold text-lg">
+                                {a.title}
+                              </h3>
                             </div>
-                            <p className="text-muted-foreground mt-1 max-w-3xl">{a.message}</p>
+                            <p className="text-muted-foreground mt-1 max-w-3xl">
+                              {a.message}
+                            </p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => toggleRead(a.id, !(delivery?.read ?? false))}>
-                              {(delivery?.read ?? false) ? "Mark Unread" : "Mark Read"}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                toggleRead(a.id, !(delivery?.read ?? false))
+                              }
+                            >
+                              {(delivery?.read ?? false)
+                                ? "Mark Unread"
+                                : "Mark Read"}
                             </Button>
-                            <Button variant="default" size="sm" onClick={() => snoozeToday(a.id)} disabled={snoozed}>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => snoozeToday(a.id)}
+                              disabled={snoozed}
+                            >
                               {snoozed ? "Snoozed" : "Snooze Today"}
                             </Button>
                           </div>
@@ -274,9 +431,13 @@ export default function Index() {
                       </div>
                     );
                   })}
-                  {supabaseReady && sessionUserId && (visibleAlertsQuery.data ?? []).length === 0 && (
-                    <div className="text-sm text-muted-foreground">No active alerts.</div>
-                  )}
+                  {supabaseReady &&
+                    sessionUserId &&
+                    (visibleAlertsQuery.data ?? []).length === 0 && (
+                      <div className="text-sm text-muted-foreground">
+                        No active alerts.
+                      </div>
+                    )}
                 </div>
               </Card>
             </TabsContent>
@@ -299,40 +460,87 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
     const s = await getCurrentSession();
     const uid = s?.user.id;
     if (uid && username) {
-      try { await upsertProfile(uid, username); } catch {}
+      try {
+        await upsertProfile(uid, username);
+      } catch {}
     }
   };
 
   return (
     <div className="flex items-center gap-2">
       {!compact && (
-        <Input type="text" placeholder="username" value={username} onChange={(e) => setUsername(e.target.value)} className={width} />
+        <Input
+          type="text"
+          placeholder="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className={width}
+        />
       )}
-      <Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} className={width} />
-      <Input type="password" placeholder="password" value={password} onChange={(e) => setPassword(e.target.value)} className={width} />
-      <Button size="sm" disabled={!email || !password || loading} onClick={async () => {
-        try {
-          setLoading(true);
-          await signInWithPassword(email, password);
-          toast({ title: "Signed in" });
-          await afterAuth();
-        } catch (e: any) {
-          toast({ title: "Sign-in failed", description: e.message, variant: "destructive" });
-        } finally { setLoading(false); }
-      }}>Sign in</Button>
-      {!compact && (
-        <Button size="sm" variant="outline" disabled={!email || !password || loading} onClick={async () => {
+      <Input
+        type="email"
+        placeholder="you@company.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className={width}
+      />
+      <Input
+        type="password"
+        placeholder="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className={width}
+      />
+      <Button
+        size="sm"
+        disabled={!email || !password || loading}
+        onClick={async () => {
           try {
             setLoading(true);
-            await signUpWithPassword(email, password);
-            toast({ title: "Account created" });
+            await signInWithPassword(email, password);
+            toast({ title: "Signed in" });
             await afterAuth();
           } catch (e: any) {
-            toast({ title: "Sign-up failed", description: e.message, variant: "destructive" });
-          } finally { setLoading(false); }
-        }}>Sign up</Button>
+            toast({
+              title: "Sign-in failed",
+              description: e.message,
+              variant: "destructive",
+            });
+          } finally {
+            setLoading(false);
+          }
+        }}
+      >
+        Sign in
+      </Button>
+      {!compact && (
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!email || !password || loading}
+          onClick={async () => {
+            try {
+              setLoading(true);
+              await signUpWithPassword(email, password);
+              toast({ title: "Account created" });
+              await afterAuth();
+            } catch (e: any) {
+              toast({
+                title: "Sign-up failed",
+                description: e.message,
+                variant: "destructive",
+              });
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          Sign up
+        </Button>
       )}
-      <Button size="sm" variant="ghost" onClick={() => signOut()}>Sign out</Button>
+      <Button size="sm" variant="ghost" onClick={() => signOut()}>
+        Sign out
+      </Button>
     </div>
   );
 }
@@ -340,43 +548,81 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
 function SeverityBadge({ s }: { s: Severity }) {
   const map: Record<Severity, string> = {
     info: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    warning: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
+    warning:
+      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
     critical: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
   };
-  return <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${map[s]}`}>{s.toUpperCase()}</span>;
+  return (
+    <span
+      className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${map[s]}`}
+    >
+      {s.toUpperCase()}
+    </span>
+  );
 }
 
-function renderReminderInfo(a: Alert, delivery?: { snoozed_until: string | null; read?: boolean }) {
+function renderReminderInfo(
+  a: Alert,
+  delivery?: { snoozed_until: string | null; read?: boolean },
+) {
   const parts: string[] = [];
   const now = new Date();
   if (a.expiresAt) {
     const exp = new Date(a.expiresAt);
-    parts.push(exp > now ? `Expires ${exp.toLocaleString()}` : `Expired ${exp.toLocaleString()}`);
+    parts.push(
+      exp > now
+        ? `Expires ${exp.toLocaleString()}`
+        : `Expired ${exp.toLocaleString()}`,
+    );
   } else {
     parts.push("No expiry");
   }
-  const snoozed = delivery?.snoozed_until ? new Date(delivery.snoozed_until) : null;
+  const snoozed = delivery?.snoozed_until
+    ? new Date(delivery.snoozed_until)
+    : null;
   if (snoozed && snoozed > now) {
     parts.push(`Snoozed until ${snoozed.toLocaleString()}`);
   } else if (delivery?.read) {
     parts.push("Read");
   } else {
-    const next = new Date(now.getTime() + a.reminderFrequencyHours * 3600 * 1000);
-    parts.push(`Next reminder by ${next.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+    const next = new Date(
+      now.getTime() + a.reminderFrequencyHours * 3600 * 1000,
+    );
+    parts.push(
+      `Next reminder by ${next.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`,
+    );
   }
   parts.push(`${a.visibilityScope.toUpperCase()} visibility`);
   return parts.join(" · ");
 }
 
-function AlertForm({ initial, onSubmit }: { initial?: Alert; onSubmit: (values: AlertInput) => void }) {
+function AlertForm({
+  initial,
+  onSubmit,
+}: {
+  initial?: Alert;
+  onSubmit: (values: AlertInput) => void;
+}) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [message, setMessage] = useState(initial?.message ?? "");
-  const [severity, setSeverity] = useState<Severity>(initial?.severity ?? "info");
-  const [visibility, setVisibility] = useState<AlertInput["visibilityScope"]>(initial?.visibilityScope ?? "org");
-  const [teams, setTeams] = useState<string>((initial?.teamIds ?? [])?.join(", ") ?? "");
-  const [users, setUsers] = useState<string>((initial?.userIds ?? [])?.join(", ") ?? "");
-  const [freq, setFreq] = useState<number>(initial?.reminderFrequencyHours ?? 2);
-  const [expires, setExpires] = useState<string>(initial?.expiresAt ? initial.expiresAt.slice(0, 16) : "");
+  const [severity, setSeverity] = useState<Severity>(
+    initial?.severity ?? "info",
+  );
+  const [visibility, setVisibility] = useState<AlertInput["visibilityScope"]>(
+    initial?.visibilityScope ?? "org",
+  );
+  const [teams, setTeams] = useState<string>(
+    (initial?.teamIds ?? [])?.join(", ") ?? "",
+  );
+  const [users, setUsers] = useState<string>(
+    (initial?.userIds ?? [])?.join(", ") ?? "",
+  );
+  const [freq, setFreq] = useState<number>(
+    initial?.reminderFrequencyHours ?? 2,
+  );
+  const [expires, setExpires] = useState<string>(
+    initial?.expiresAt ? initial.expiresAt.slice(0, 16) : "",
+  );
   const [active, setActive] = useState<boolean>(initial?.active ?? true);
 
   useEffect(() => {
@@ -401,8 +647,20 @@ function AlertForm({ initial, onSubmit }: { initial?: Alert; onSubmit: (values: 
           message,
           severity,
           visibilityScope: visibility,
-          teamIds: visibility === "teams" ? teams.split(",").map((s) => s.trim()).filter(Boolean) : null,
-          userIds: visibility === "users" ? users.split(",").map((s) => s.trim()).filter(Boolean) : null,
+          teamIds:
+            visibility === "teams"
+              ? teams
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+              : null,
+          userIds:
+            visibility === "users"
+              ? users
+                  .split(",")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+              : null,
           reminderFrequencyHours: Number(freq) || 2,
           expiresAt: expires ? new Date(expires).toISOString() : null,
           active,
@@ -413,11 +671,19 @@ function AlertForm({ initial, onSubmit }: { initial?: Alert; onSubmit: (values: 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="title">Title</Label>
-          <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="severity">Severity</Label>
-          <Select value={severity} onValueChange={(v) => setSeverity(v as Severity)}>
+          <Select
+            value={severity}
+            onValueChange={(v) => setSeverity(v as Severity)}
+          >
             <SelectTrigger id="severity">
               <SelectValue />
             </SelectTrigger>
@@ -430,11 +696,20 @@ function AlertForm({ initial, onSubmit }: { initial?: Alert; onSubmit: (values: 
         </div>
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor="message">Message</Label>
-          <Textarea id="message" rows={4} value={message} onChange={(e) => setMessage(e.target.value)} required />
+          <Textarea
+            id="message"
+            rows={4}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="visibility">Visibility</Label>
-          <Select value={visibility} onValueChange={(v) => setVisibility(v as any)}>
+          <Select
+            value={visibility}
+            onValueChange={(v) => setVisibility(v as any)}
+          >
             <SelectTrigger id="visibility">
               <SelectValue />
             </SelectTrigger>
@@ -448,26 +723,52 @@ function AlertForm({ initial, onSubmit }: { initial?: Alert; onSubmit: (values: 
         {visibility === "teams" && (
           <div className="space-y-2">
             <Label htmlFor="teams">Team IDs (comma-separated)</Label>
-            <Input id="teams" placeholder="engineering, marketing" value={teams} onChange={(e) => setTeams(e.target.value)} />
+            <Input
+              id="teams"
+              placeholder="engineering, marketing"
+              value={teams}
+              onChange={(e) => setTeams(e.target.value)}
+            />
           </div>
         )}
         {visibility === "users" && (
           <div className="space-y-2">
             <Label htmlFor="users">User IDs (comma-separated)</Label>
-            <Input id="users" placeholder="uuid-1, uuid-2" value={users} onChange={(e) => setUsers(e.target.value)} />
+            <Input
+              id="users"
+              placeholder="uuid-1, uuid-2"
+              value={users}
+              onChange={(e) => setUsers(e.target.value)}
+            />
           </div>
         )}
         <div className="space-y-2">
           <Label htmlFor="freq">Reminder (hours)</Label>
-          <Input id="freq" type="number" min={1} step={1} value={freq} onChange={(e) => setFreq(parseInt(e.target.value, 10))} />
+          <Input
+            id="freq"
+            type="number"
+            min={1}
+            step={1}
+            value={freq}
+            onChange={(e) => setFreq(parseInt(e.target.value, 10))}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="expires">Expires At</Label>
-          <Input id="expires" type="datetime-local" step={60} value={expires} onChange={(e) => setExpires(e.target.value)} />
+          <Input
+            id="expires"
+            type="datetime-local"
+            step={60}
+            value={expires}
+            onChange={(e) => setExpires(e.target.value)}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="active">Status</Label>
-          <Select value={String(active)} onValueChange={(v) => setActive(v === "true") }>
+          <Select
+            value={String(active)}
+            onValueChange={(v) => setActive(v === "true")}
+          >
             <SelectTrigger id="active">
               <SelectValue />
             </SelectTrigger>

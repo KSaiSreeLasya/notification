@@ -8,14 +8,20 @@ export function getSupabase(): SupabaseClient | null {
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
   if (!url || !key) return null;
   client = createClient(url, key, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
     db: { schema: "public" },
   });
   return client;
 }
 
 export function isSupabaseConfigured(): boolean {
-  return Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+  return Boolean(
+    import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY,
+  );
 }
 
 export async function getCurrentSession(): Promise<Session | null> {

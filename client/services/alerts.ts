@@ -31,7 +31,9 @@ function toAlert(row: any): Alert {
 }
 
 export async function listAlerts(): Promise<Alert[]> {
-  const { data, error } = await table().select("*").order("created_at", { ascending: false });
+  const { data, error } = await table()
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) throw error;
   return ((data as any[]) || []).map(toAlert);
 }
@@ -53,19 +55,28 @@ export async function createAlert(input: AlertInput): Promise<Alert> {
   return toAlert(data);
 }
 
-export async function updateAlert(id: string, patch: Partial<AlertInput>): Promise<Alert> {
+export async function updateAlert(
+  id: string,
+  patch: Partial<AlertInput>,
+): Promise<Alert> {
   const payload: any = {};
   if (patch.title !== undefined) payload.title = patch.title;
   if (patch.message !== undefined) payload.message = patch.message;
   if (patch.severity !== undefined) payload.severity = patch.severity;
-  if (patch.visibilityScope !== undefined) payload.visibility_scope = patch.visibilityScope;
+  if (patch.visibilityScope !== undefined)
+    payload.visibility_scope = patch.visibilityScope;
   if (patch.teamIds !== undefined) payload.team_ids = patch.teamIds ?? null;
   if (patch.userIds !== undefined) payload.user_ids = patch.userIds ?? null;
-  if (patch.reminderFrequencyHours !== undefined) payload.reminder_frequency_hours = patch.reminderFrequencyHours;
+  if (patch.reminderFrequencyHours !== undefined)
+    payload.reminder_frequency_hours = patch.reminderFrequencyHours;
   if (patch.expiresAt !== undefined) payload.expires_at = patch.expiresAt;
   if (patch.active !== undefined) payload.active = patch.active;
 
-  const { data, error } = await table().update(payload).eq("id", id).select().single();
+  const { data, error } = await table()
+    .update(payload)
+    .eq("id", id)
+    .select()
+    .single();
   if (error) throw error;
   return toAlert(data);
 }
@@ -75,13 +86,23 @@ export async function deleteAlert(id: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function toggleAlertActive(id: string, active: boolean): Promise<Alert> {
-  const { data, error } = await table().update({ active }).eq("id", id).select().single();
+export async function toggleAlertActive(
+  id: string,
+  active: boolean,
+): Promise<Alert> {
+  const { data, error } = await table()
+    .update({ active })
+    .eq("id", id)
+    .select()
+    .single();
   if (error) throw error;
   return toAlert(data);
 }
 
-export async function getVisibleAlertsForUser(userId: string, teamId?: string | null): Promise<Alert[]> {
+export async function getVisibleAlertsForUser(
+  userId: string,
+  teamId?: string | null,
+): Promise<Alert[]> {
   const nowIso = new Date().toISOString();
   const { data, error } = await table()
     .select("*")
@@ -91,25 +112,43 @@ export async function getVisibleAlertsForUser(userId: string, teamId?: string | 
   const all = ((data as any[]) || []).map(toAlert);
   return all.filter((a) => {
     if (a.visibilityScope === "org") return true;
-    if (a.visibilityScope === "teams") return (a.teamIds ?? []).includes(teamId ?? "");
-    if (a.visibilityScope === "users") return (a.userIds ?? []).includes(userId);
+    if (a.visibilityScope === "teams")
+      return (a.teamIds ?? []).includes(teamId ?? "");
+    if (a.visibilityScope === "users")
+      return (a.userIds ?? []).includes(userId);
     return false;
   });
 }
 
-export async function getDelivery(userId: string, alertId: string): Promise<NotificationDelivery | null> {
-  const { data, error } = await deliveries().select("*").eq("user_id", userId).eq("alert_id", alertId).maybeSingle();
+export async function getDelivery(
+  userId: string,
+  alertId: string,
+): Promise<NotificationDelivery | null> {
+  const { data, error } = await deliveries()
+    .select("*")
+    .eq("user_id", userId)
+    .eq("alert_id", alertId)
+    .maybeSingle();
   if (error) throw error;
-  return (data as any) as NotificationDelivery | null;
+  return data as any as NotificationDelivery | null;
 }
 
-export async function upsertDelivery(record: Omit<NotificationDelivery, "id" | "created_at" | "updated_at">): Promise<NotificationDelivery> {
-  const { data, error } = await deliveries().upsert(record, { onConflict: "user_id,alert_id" }).select().single();
+export async function upsertDelivery(
+  record: Omit<NotificationDelivery, "id" | "created_at" | "updated_at">,
+): Promise<NotificationDelivery> {
+  const { data, error } = await deliveries()
+    .upsert(record, { onConflict: "user_id,alert_id" })
+    .select()
+    .single();
   if (error) throw error;
   return data as any as NotificationDelivery;
 }
 
-export async function snoozeAlert(userId: string, alertId: string, until: string): Promise<NotificationDelivery> {
+export async function snoozeAlert(
+  userId: string,
+  alertId: string,
+  until: string,
+): Promise<NotificationDelivery> {
   const existing = await getDelivery(userId, alertId);
   const payload = {
     user_id: userId,
@@ -121,7 +160,11 @@ export async function snoozeAlert(userId: string, alertId: string, until: string
   return upsertDelivery(payload as any);
 }
 
-export async function markAlertRead(userId: string, alertId: string, read: boolean): Promise<NotificationDelivery> {
+export async function markAlertRead(
+  userId: string,
+  alertId: string,
+  read: boolean,
+): Promise<NotificationDelivery> {
   const existing = await getDelivery(userId, alertId);
   const payload = {
     user_id: userId,
@@ -133,8 +176,10 @@ export async function markAlertRead(userId: string, alertId: string, read: boole
   return upsertDelivery(payload as any);
 }
 
-export async function getUserDeliveries(userId: string): Promise<NotificationDelivery[]> {
+export async function getUserDeliveries(
+  userId: string,
+): Promise<NotificationDelivery[]> {
   const { data, error } = await deliveries().select("*").eq("user_id", userId);
   if (error) throw error;
-  return (data as any) as NotificationDelivery[];
+  return data as any as NotificationDelivery[];
 }
