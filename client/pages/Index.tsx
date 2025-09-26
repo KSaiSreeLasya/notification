@@ -147,9 +147,9 @@ export default function Index() {
   const snoozeToday = (alertId: string) => {
     const endOfDay = new Date();
     endOfDay.setHours(23, 59, 59, 999);
-    snoozeAlert(userId, alertId, endOfDay.toISOString())
+    snoozeAlert(sessionUserId!, alertId, endOfDay.toISOString())
       .then(() => {
-        qc.invalidateQueries({ queryKey: ["deliveries", userId] });
+        qc.invalidateQueries({ queryKey: ["deliveries", sessionUserId] });
         toast({ title: "Snoozed until tomorrow" });
       })
       .catch((e) =>
@@ -162,7 +162,7 @@ export default function Index() {
   };
 
   const toggleRead = (alertId: string, read: boolean) => {
-    markAlertRead(userId, alertId, read)
+    markAlertRead(sessionUserId!, alertId, read)
       .then(() => qc.invalidateQueries({ queryKey: ["deliveries", userId] }))
       .catch((e) =>
         toast({
