@@ -687,6 +687,60 @@ function renderReminderInfo(
   return parts.join(" · ");
 }
 
+function UserMultiSelect({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const { data } = useQuery({
+    queryKey: ["admin-users-list"],
+    queryFn: adminListUsers,
+    staleTime: 60_000,
+  });
+  const users = (data ?? []).filter((u) => !!u.email) as { id: string; email: string }[];
+  const selected = new Set(value);
+  const toggle = (email: string) => {
+    const next = new Set(selected);
+    if (next.has(email)) next.delete(email);
+    else next.add(email);
+    onChange(Array.from(next));
+  };
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="w-full justify-between">
+          {value.length > 0 ? `${value.length} selected` : "Select users"}
+          <span className="text-xs text-muted-foreground">
+            {value.length > 0 ? value.slice(0, 3).join(", ") : ""}
+          </span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0">
+        <Command>
+          <CommandInput placeholder="Search users..." />
+          <CommandList>
+            <CommandEmpty>No users found.</CommandEmpty>
+            <CommandGroup>
+              {users.map((u) => {
+                const email = u.email;
+                const checked = selected.has(email);
+                return (
+                  <CommandItem key={u.id} value={email} onSelect={() => toggle(email)}>
+                    <input type="checkbox" className="mr-2" checked={checked} readOnly />
+                    <span>{email}</span>
+                  </CommandItem>
+                );
+              })}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function AlertForm({
   initial,
   onSubmit,
