@@ -11,10 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { getSupabase, isSupabaseConfigured, getCurrentSession, signInWithEmail, signOut } from "@/lib/supabase";
+import { getSupabase, isSupabaseConfigured, getCurrentSession, signUpWithPassword, signInWithPassword, signOut } from "@/lib/supabase";
 import { getCurrentUserTeam, setCurrentUserTeam } from "@/lib/user";
 import type { Alert, AlertInput, Severity } from "@shared/api";
 import { createAlert, deleteAlert, listAlerts, toggleAlertActive, updateAlert, getVisibleAlertsForUser, snoozeAlert, markAlertRead, getUserDeliveries } from "@/services/alerts";
+import { upsertProfile } from "@/services/profiles";
 
 export default function Index() {
   const supabaseReady = isSupabaseConfigured() && !!getSupabase();
