@@ -67,7 +67,7 @@ export async function updateAlert(id: string, patch: Partial<AlertInput>): Promi
 
   const { data, error } = await table().update(payload).eq("id", id).select().single();
   if (error) throw error;
-  return data as any as Alert;
+  return toAlert(data);
 }
 
 export async function deleteAlert(id: string): Promise<void> {
