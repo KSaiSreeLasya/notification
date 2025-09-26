@@ -534,6 +534,9 @@ function PasswordAuth({ compact }: { compact?: boolean }) {
               await signUpWithPassword(email, password);
               toast({ title: "Account created" });
               sonnerToast.success(`Account created for ${email}`);
+              try {
+                await signInWithPassword(email, password);
+              } catch {}
               await afterAuth();
             } catch (e: any) {
               toast({
