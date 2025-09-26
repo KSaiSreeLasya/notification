@@ -319,6 +319,28 @@ function SeverityBadge({ s }: { s: Severity }) {
   return <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${map[s]}`}>{s.toUpperCase()}</span>;
 }
 
+function renderReminderInfo(a: Alert, delivery?: { snoozed_until: string | null; read?: boolean }) {
+  const parts: string[] = [];
+  const now = new Date();
+  if (a.expiresAt) {
+    const exp = new Date(a.expiresAt);
+    parts.push(exp > now ? `Expires ${exp.toLocaleString()}` : `Expired ${exp.toLocaleString()}`);
+  } else {
+    parts.push("No expiry");
+  }
+  const snoozed = delivery?.snoozed_until ? new Date(delivery.snoozed_until) : null;
+  if (snoozed && snoozed > now) {
+    parts.push(`Snoozed until ${snoozed.toLocaleString()}`);
+  } else if (delivery?.read) {
+    parts.push("Read");
+  } else {
+    const next = new Date(now.getTime() + a.reminderFrequencyHours * 3600 * 1000);
+    parts.push(`Next reminder by ${next.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+  }
+  parts.push(`${a.visibilityScope.toUpperCase()} visibility`);
+  return parts.join(" · ");
+}
+
 function AlertForm({ initial, onSubmit }: { initial?: Alert; onSubmit: (values: AlertInput) => void }) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [message, setMessage] = useState(initial?.message ?? "");
