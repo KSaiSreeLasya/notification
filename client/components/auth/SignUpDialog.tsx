@@ -69,7 +69,6 @@ export default function SignUpDialog() {
                 try {
                   setLoading(true);
                   await signUpWithPassword(email, password);
-                  toast({ title: "Account created" });
                   sonnerToast.success(`Account created for ${email}`);
                   let s = await getCurrentSession();
                   if (!s) {
@@ -94,11 +93,6 @@ export default function SignUpDialog() {
                   }
                   setOpen(false);
                 } catch (e: any) {
-                  toast({
-                    title: "Sign-up failed",
-                    description: e.message,
-                    variant: "destructive",
-                  });
                   sonnerToast.error(`Sign-up failed: ${e.message}`);
                 } finally {
                   setLoading(false);
