@@ -129,6 +129,14 @@ export default function Index() {
               <TabsTrigger value="enduser">End User</TabsTrigger>
             </TabsList>
 
+            {alertsQuery.error && (
+              <Card className="mt-4 p-4 border-destructive/40 bg-destructive/5">
+                <div className="text-sm text-destructive-foreground">
+                  Failed to load alerts: {(alertsQuery.error as any).message}
+                </div>
+              </Card>
+            )}
+
             <TabsContent value="admin" className="mt-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex items-center gap-2">
