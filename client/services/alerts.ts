@@ -13,10 +13,27 @@ function deliveries() {
   return s.from("notification_deliveries");
 }
 
+function toAlert(row: any): Alert {
+  return {
+    id: row.id,
+    title: row.title,
+    message: row.message,
+    severity: row.severity,
+    visibilityScope: row.visibility_scope,
+    teamIds: row.team_ids,
+    userIds: row.user_ids,
+    reminderFrequencyHours: row.reminder_frequency_hours,
+    expiresAt: row.expires_at,
+    active: row.active,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
 export async function listAlerts(): Promise<Alert[]> {
   const { data, error } = await table().select("*").order("created_at", { ascending: false });
   if (error) throw error;
-  return (data as any) as Alert[];
+  return ((data as any[]) || []).map(toAlert);
 }
 
 export async function createAlert(input: AlertInput): Promise<Alert> {
