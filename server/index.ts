@@ -5,6 +5,7 @@ import { handleDemo } from "./routes/demo";
 import { adminCreateUser } from "./routes/admin-create-user";
 import { getVisibleAlerts } from "./routes/visible-alerts";
 import { seedTestOrgAlert } from "./routes/seed-test";
+import { adminListUsers } from "./routes/admin-list-users";
 
 export function createServer() {
   const app = express();
@@ -29,6 +30,7 @@ export function createServer() {
   app.get("/api/seed-test-alert", seedTestOrgAlert);
 
   // Admin routes
+  app.get("/api/admin/users-list", adminListUsers);
   app.post("/api/admin/users", adminCreateUser);
 
   return app;
