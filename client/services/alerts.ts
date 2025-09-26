@@ -50,7 +50,7 @@ export async function createAlert(input: AlertInput): Promise<Alert> {
   };
   const { data, error } = await table().insert(payload).select().single();
   if (error) throw error;
-  return data as any as Alert;
+  return toAlert(data);
 }
 
 export async function updateAlert(id: string, patch: Partial<AlertInput>): Promise<Alert> {
