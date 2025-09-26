@@ -155,7 +155,7 @@ export default function Index() {
     queryKey: ["visible-alerts", sessionEmail, sessionUserId, team],
     queryFn: () =>
       getVisibleAlertsForUser(sessionEmail ?? null, team || null, sessionUserId),
-    enabled: supabaseReady,
+    enabled: true,
   });
 
   const snoozeToday = (alertId: string) => {
