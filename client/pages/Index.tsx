@@ -76,7 +76,7 @@ export default function Index() {
   const alertsQuery = useQuery({
     queryKey: ["alerts"],
     queryFn: listAlerts,
-    enabled: supabaseReady && !!sessionUserId,
+    enabled: supabaseReady,
   });
 
   const deliveriesQuery = useQuery({
@@ -140,8 +140,8 @@ export default function Index() {
 
   const visibleAlertsQuery = useQuery({
     queryKey: ["visible-alerts", sessionUserId, team],
-    queryFn: () => getVisibleAlertsForUser(sessionUserId!, team || null),
-    enabled: supabaseReady && !!sessionUserId,
+    queryFn: () => getVisibleAlertsForUser(sessionUserId ?? null, team || null),
+    enabled: supabaseReady,
   });
 
   const snoozeToday = (alertId: string) => {
@@ -163,7 +163,7 @@ export default function Index() {
 
   const toggleRead = (alertId: string, read: boolean) => {
     markAlertRead(sessionUserId!, alertId, read)
-      .then(() => qc.invalidateQueries({ queryKey: ["deliveries", userId] }))
+      .then(() => qc.invalidateQueries({ queryKey: ["deliveries", sessionUserId] }))
       .catch((e) =>
         toast({
           title: "Update failed",
@@ -216,16 +216,6 @@ export default function Index() {
             )}
 
             <TabsContent value="admin" className="mt-6">
-              {!sessionUserId && (
-                <Card className="mb-4 p-4">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      Sign in to manage alerts.
-                    </div>
-                    <PasswordAuth />
-                  </div>
-                </Card>
-              )}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Label className="text-sm">Severity</Label>
@@ -252,7 +242,7 @@ export default function Index() {
                   }}
                 >
                   <DialogTrigger asChild>
-                    <Button disabled={!supabaseReady || !sessionUserId}>
+                    <Button disabled={!supabaseReady}>
                       Create Alert
                     </Button>
                   </DialogTrigger>
@@ -410,6 +400,7 @@ export default function Index() {
                               onClick={() =>
                                 toggleRead(a.id, !(delivery?.read ?? false))
                               }
+                              disabled={!sessionUserId}
                             >
                               {(delivery?.read ?? false)
                                 ? "Mark Unread"
@@ -419,7 +410,7 @@ export default function Index() {
                               variant="default"
                               size="sm"
                               onClick={() => snoozeToday(a.id)}
-                              disabled={snoozed}
+                              disabled={snoozed || !sessionUserId}
                             >
                               {snoozed ? "Snoozed" : "Snooze Today"}
                             </Button>
@@ -432,7 +423,6 @@ export default function Index() {
                     );
                   })}
                   {supabaseReady &&
-                    sessionUserId &&
                     (visibleAlertsQuery.data ?? []).length === 0 && (
                       <div className="text-sm text-muted-foreground">
                         No active alerts.
