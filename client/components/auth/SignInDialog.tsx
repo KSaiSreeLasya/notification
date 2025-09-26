@@ -54,8 +54,7 @@ export default function SignInDialog() {
                 try {
                   setLoading(true);
                   await signInWithPassword(email, password);
-                  toast({ title: "Signed in" });
-                  sonnerToast.success(`Welcome ${email}`);
+                  sonnerToast.success(`Signed in as ${email}`);
                   const s = await getCurrentSession();
                   const uid = s?.user.id;
                   const pendingKey = `pending_profile_${email.toLowerCase()}`;
@@ -68,11 +67,6 @@ export default function SignInDialog() {
                   }
                   setOpen(false);
                 } catch (e: any) {
-                  toast({
-                    title: "Sign-in failed",
-                    description: e.message,
-                    variant: "destructive",
-                  });
                   sonnerToast.error(`Sign-in failed: ${e.message}`);
                 } finally {
                   setLoading(false);
