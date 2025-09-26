@@ -30,6 +30,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
+import SignInDialog from "@/components/auth/SignInDialog";
+import SignUpDialog from "@/components/auth/SignUpDialog";
 import { toast as sonnerToast } from "sonner";
 import {
   getSupabase,
@@ -366,13 +368,17 @@ export default function Index() {
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {sessionUserId ? (
-                      <>User ID: {sessionUserId.slice(0, 8)}…</>
+                      <div className="flex items-center gap-2">
+                        <span>User ID: {sessionUserId.slice(0, 8)}…</span>
+                        <Button size="sm" variant="ghost" onClick={() => signOut()}>
+                          Sign out
+                        </Button>
+                      </div>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <PasswordAuth />
-                        <span className="hidden sm:inline">
-                          Sign in or sign up to see targeted alerts
-                        </span>
+                        <SignInDialog />
+                        <SignUpDialog />
+                        <span className="hidden sm:inline">Sign in or sign up to see targeted alerts</span>
                       </div>
                     )}
                   </div>
