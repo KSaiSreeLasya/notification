@@ -788,7 +788,6 @@ function AlertForm({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="org">Entire Organization</SelectItem>
-              <SelectItem value="teams">Specific Teams</SelectItem>
               <SelectItem value="users">Specific Users</SelectItem>
             </SelectContent>
           </Select>
